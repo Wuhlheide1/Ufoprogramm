@@ -11,11 +11,11 @@ public class GameOver {
     Ufo ufo;
 
     GameOver(Ufo pUfo) {
-        gameOver = new Picture(0, 0, 300, 800, "GameOver.png");
-        playAgain = new Picture(50, 475, 200, 100, "PlayAgain.png");
-        quit = new Picture(50, 600, 200, 100, "Quit.png");
-        score = new Text(30, 100, "Score: " + scoreValue, Color.WHITE);
-        highScore = new Text(30, 130, "High Score: " + highScoreValue, Color.WHITE);
+        gameOver = new Picture(0 - 300, 0, 300, 800, "GameOver.png");
+        playAgain = new Picture(50 - 300, 475, 200, 100, "PlayAgain.png");
+        quit = new Picture(50 - 300, 600, 200, 100, "Quit.png");
+        score = new Text(30 - 300, 100, "Score: " + scoreValue, Color.WHITE);
+        highScore = new Text(30 - 300, 130, "High Score: " + highScoreValue, Color.WHITE);
         ufo = pUfo;
         gameOver.setHidden(true);
         playAgain.setHidden(true);
@@ -23,6 +23,14 @@ public class GameOver {
         score.setHidden(true);
         highScore.setHidden(true);
 
+    }
+
+    public void moveGameOver(double pX, double pY) {
+        gameOver.move(pX, pY);
+        playAgain.move(pX, pY);
+        quit.move(pX, pY);
+        score.move(pX, pY);
+        highScore.move(pX, pY);
     }
 
     public void hideGameOver(boolean hideGameover) {

@@ -26,12 +26,14 @@ public class Ufoprogramm {
 
         // Initialize laser object for UFO weapons system
         laser = new Laser(-20, 0, 1);
-        gameOverScreen = new GameOver(ufo);
-        gameOverScreen.hideGameOver(true);
 
         // Create player UFO and center it at the bottom of the screen
         ufo = new Ufo(150, 800 - 100, 1, laser, this);
         ufo.ufoMove(-(ufo.getWidth() / 2));
+
+        // Initialize game over screen after UFO is created
+        gameOverScreen = new GameOver(ufo);
+        gameOverScreen.hideGameOver(true);
 
         // Create asteroid objects and position them off-screen initially
         for (int i = 0; i < astroids.length; i++) {
@@ -187,11 +189,14 @@ public class Ufoprogramm {
         boolean running = true;
         int highScore = getHighScore();
         System.out.println("High Score: " + highScore);
+
+        // Ensure game over screen is hidden at startup
+        gameOverScreen.hideGameOver(true);
+
         while (running) {
             // Reset game state for a new round
             score.setColor(new Color(255, 255, 255));
             ufo.setHidden(true);
-            gameOverScreen.hideGameOver(true);
 
             // Wait for player to press Enter to begin the game
             while (!gameRunning) {
@@ -214,6 +219,7 @@ public class Ufoprogramm {
                     gameOverScreen.setHighScore(getHighScore());
                     gameOverScreen.setScore(scoreValue);
                     window.wait(1000);
+                    gameOverScreen.moveGameOver(300, 0);
                     gameOverScreen.hideGameOver(false);
                     score.setHidden(true);
                     while (gameOver) {
@@ -227,8 +233,8 @@ public class Ufoprogramm {
                         boolean quitGame = gameOverScreen.quitClicked();
                         if (quitGame) {
                             gameOver = false;
-                            running = true;
-                            break;
+                            running = false;
+                            System.exit(0);
                         }
                         window.wait(10);
                     }
