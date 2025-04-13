@@ -18,22 +18,22 @@ public class Ufoprogramm {
     Text score;
     int scoreValue = 0;
     private Laser laser; // Add this field
-    
-        Ufoprogramm() {
-            window = new View(300, 800, "Ufo");
-            laser = new Laser(0, 0, 1); // Initialize laser first
-            ufo = new Ufo(150, 800 - 100, 1, laser); // Pass initialized laser
-            background = new Picture(0, 0, "hintergrund.png");
-            ufo = new Ufo(150, 800 - 100, 1, laser);
-            ufo.ufoMove(-(ufo.getWidth() / 2));
-            for (int i = 0; i < astroids.length; i++) {
-                astroids[i] = new Astroid(-250, -250, 1, ufo);
-            }
-            playSound("background.wav", true, -20f);
-            score = new Text(15, 15, "Score: 0", Color.WHITE);
-            score.setFontMonospaced(false, 20);
-            loop();
+
+    Ufoprogramm() {
+        window = new View(300, 800, "Ufo");
+        laser = new Laser(0, 0, 1); // Initialize laser first
+        ufo = new Ufo(150, 800 - 100, 1, laser, this); // Pass initialized laser and this reference
+        background = new Picture(0, 0, "hintergrund.png");
+        ufo = new Ufo(150, 800 - 100, 1, laser, this);
+        ufo.ufoMove(-(ufo.getWidth() / 2));
+        for (int i = 0; i < astroids.length; i++) {
+            astroids[i] = new Astroid(-250, -250, 1, ufo);
         }
+        playSound("background.wav", true, -20f);
+        score = new Text(15, 15, "Score: 0", Color.WHITE);
+        score.setFontMonospaced(false, 20);
+        loop();
+    }
 
     public void increaseScore(int pScore) {
         scoreValue = scoreValue + pScore;
@@ -149,7 +149,7 @@ public class Ufoprogramm {
                     }
                 }
             }
-            if (astroids[i].getAstroid().intersects(laser.getLaser())) {
+            if (laser.laserIntersects(astroids[i].getAstroid())) {
                 // Handle laser collision
                 increaseScore(astroids[i].getScoreValue() + 20);
                 astroids[i].setAstroid(-250, -250); // Move it off-screen
@@ -172,7 +172,7 @@ public class Ufoprogramm {
             }
             ufo.ufoMove(moveAmount);
         }
-        if (window.keyPressed('w') && ufo.isGunPoweredUp()) {
+        if (ufo.isGunPoweredUp()) {
             ufo.shootLaser();
         }
     }
@@ -260,7 +260,12 @@ public class Ufoprogramm {
         }
     }
 
+    public void overwiriteLaser(Laser newLaser) {
+        // overwrites laser with new laser
+        laser = newLaser;
+    }
+
     public static void main(String[] args) {
-        new Ufoprogramm();
+        Ufoprogramm ufoProgramm = new Ufoprogramm();
     }
 }

@@ -24,8 +24,8 @@ public class Laser {
         return laser.intersects(object);
     }
 
-    public void hide() {
-        laser.setHidden(true);
+    public void setHidden(boolean pHidden) {
+        laser.setHidden(pHidden);
     }
 
     public double getX() {
@@ -52,5 +52,9 @@ public class Laser {
         y = yOrigin;
         x = pX;
         laser.moveTo(x, y);
+    }
+
+    public boolean laserIntersects(Picture object) {
+        return laser.intersects(object);
     }
 }

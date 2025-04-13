@@ -8,10 +8,11 @@ public class Ufo {
     private Picture explosion;
     private boolean isGunPoweredUp = false;
     private long lastShotTime = 0;
-    private final long SHOT_INTERVAL = 300; // milliseconds between shots
+    private final long SHOT_INTERVAL = 200; // milliseconds between shots
     private Laser currentLaser;
+    Ufoprogramm ufoprogramm;
 
-    Ufo(double pX, double pY, double pScale, Laser pLaser) {
+    Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
         ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rakete.png");
         scale = pScale;
         explosion = new Picture(ufo.getShapeX(), ufo.getShapeY(), 85 * 0.75 * scale, 64 * 0.75 * scale,
@@ -19,6 +20,7 @@ public class Ufo {
         explosion.setHidden(true);
         ufo.setHidden(false);
         currentLaser = pLaser;
+        ufoprogramm = pUfoprogramm;
     }
 
     public void setUfo(double pX, double pY) {
@@ -62,9 +64,10 @@ public class Ufo {
 
     public void gunPowerUp() {
         isGunPoweredUp = true;
+        lastShotTime = 0;
         new Thread(() -> {
             try {
-                Thread.sleep(5000); // Power-up lasts 5 seconds
+                Thread.sleep(10000); // Power-up lasts 5 seconds
                 isGunPoweredUp = false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -73,25 +76,35 @@ public class Ufo {
     }
 
     public void shootLaser() {
-        if (isGunPoweredUp && System.currentTimeMillis() - lastShotTime > SHOT_INTERVAL) {
+        if (isGunPoweredUp == true && System.currentTimeMillis() - lastShotTime > SHOT_INTERVAL) {
             lastShotTime = System.currentTimeMillis();
             // Calculate center position of UFO
             double ufoCenterX = ufo.getShapeX() + (ufo.getShapeWidth() / 2);
             // Position laser at UFO's center
             double laserX = ufoCenterX - (currentLaser.getWidth() / 2);
-            currentLaser.setLaser(laserX); // Reset laser position
+
+            // Properly hide the current laser before creating a new one
+            if (currentLaser != null) {
+                currentLaser.setHidden(true);
+            }
+
+            currentLaser = new Laser(laserX, ufo.getShapeY(), scale);
+            ufoprogramm.overwiriteLaser(currentLaser);
             currentLaser.getLaser().setHidden(false);
 
             new Thread(() -> {
+                Laser thisLaser = currentLaser; // Store reference to this specific laser
                 try {
-                    while (currentLaser.getY() > 0) {
-                        // This line needs to match your Laser.move() method signature
-                        currentLaser.move(-10); // If your Laser.move() takes one parameter
+                    while (thisLaser.getY() > 0) {
+                        thisLaser.move(-10);
                         Thread.sleep(50);
                     }
-                    currentLaser.hide();
+                    // Always ensure the laser is hidden when done
+                    thisLaser.setHidden(true);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    // Hide laser even if interrupted
+                    thisLaser.setHidden(true);
                 }
             }).start();
         }
