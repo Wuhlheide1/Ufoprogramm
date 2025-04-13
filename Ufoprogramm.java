@@ -1,6 +1,7 @@
 import sas.*;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.awt.Color.*;
 import javax.sound.sampled.*;
 import java.io.File;
@@ -149,11 +150,17 @@ public class Ufoprogramm {
                     }
                 }
             }
-            if (laser.laserIntersects(astroids[i].getAstroid())) {
-                // Handle laser collision
-                increaseScore(astroids[i].getScoreValue() + 20);
-                astroids[i].setAstroid(-250, -250); // Move it off-screen
-                laser.setLaser(-250); // Move laser off-screen
+            for (int l = 0; l < ufo.getActiveLasers().size(); l++) {
+                if (ufo.laserIntersects(astroids[i].getAstroid(), ufo.getActiveLasers().get(l))) {
+                    // Handle laser collision
+                    increaseScore(astroids[i].getScoreValue() + 20);
+                    astroids[i].setAstroid(-250, -250); // Move it off-screen
+                    laser.setLaser(-250); // Move laser off-screen
+
+                    // Add these lines to ensure new asteroids spawn after destruction
+                    astroidRandomizer(i);
+                    astroidStartPosition(i);
+                }
             }
         }
     }
@@ -206,28 +213,28 @@ public class Ufoprogramm {
 
     public void astroidRandomizer(int astroidPosition) {
         // replace astroid with random special astroid
-        // random integer: either 1 or 5
         int astroidType = (int) (Math.random() * 100) + 1;
-        // if astroidType is 1, replace astroid with normal astroid
-        if (astroidType < 80) {
+
+        // Regular asteroids (85% chance)
+        if (astroidType <= 85) {
             astroids[astroidPosition] = new Astroid(-250, -250, 1, ufo);
             return;
         }
-        // if astroidType is 2, replace astroid with fast astroid
-        if (astroidType >= 80 && astroidType < 90) {
+
+        // Fast asteroids (10% chance)
+        if (astroidType <= 95) {
             astroids[astroidPosition] = new FastAstroid(-250, -250, 1, ufo);
             return;
         }
 
-        if (astroidType <= 97 && astroidType >= 90) {
+        // ZigZag asteroids (3% chance - reduced because they're difficult)
+        if (astroidType <= 98) {
             astroids[astroidPosition] = new ZigZagAstroid(-250, -250, 1, ufo);
             return;
         }
 
-        if (astroidType > 97 && astroidType <= 100) {
-            astroids[astroidPosition] = new PowerUpAstroid(-250, -250, 1, ufo);
-        }
-
+        // Power-up asteroids (2% chance - reduced frequency)
+        astroids[astroidPosition] = new PowerUpAstroid(-250, -250, 1, ufo);
     }
 
     public void astroidStartPosition(int astroidPosition) {
