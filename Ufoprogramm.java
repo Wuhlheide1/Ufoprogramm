@@ -18,52 +18,117 @@ public class Ufoprogramm {
     boolean gameRunning = false;
     Text score;
     int scoreValue = 0;
-    private Laser laser; // Add this field
+    private Laser laser; // Laser object for UFO weapons system
 
+    // Constructor - Sets up the game environment and initializes all game objects
     Ufoprogramm() {
         window = new View(300, 800, "Ufo");
-        laser = new Laser(0, 0, 1); // Initialize laser first
-        ufo = new Ufo(150, 800 - 100, 1, laser, this); // Pass initialized laser and this reference
         background = new Picture(0, 0, "hintergrund.png");
+
+        // Initialize laser object for UFO weapons system
+        laser = new Laser(0, 0, 1);
+
+        // Create player UFO and center it at the bottom of the screen
         ufo = new Ufo(150, 800 - 100, 1, laser, this);
         ufo.ufoMove(-(ufo.getWidth() / 2));
+
+        // Create asteroid objects and position them off-screen initially
         for (int i = 0; i < astroids.length; i++) {
             astroids[i] = new Astroid(-250, -250, 1, ufo);
         }
+
+        // Start background music and initialize score display
         playSound("background.wav", true, -20f);
         score = new Text(15, 15, "Score: 0", Color.WHITE);
         score.setFontMonospaced(false, 20);
+
+        // Begin the main game loop
         loop();
     }
 
+    // Handles all collision detection between game objects
+    public void checkCollision() {
+        for (int i = 0; i < astroids.length; i++) {
+            // Detect if UFO has collided with any asteroid
+            if (astroids[i].isColliding()) {
+                handleUfoCollision(i);
+            }
+
+            // Check if any active lasers have hit asteroids
+            checkLaserCollision(i);
+        }
+    }
+
+    // Processes what happens when the UFO collides with an asteroid
+    private void handleUfoCollision(int asteroidIndex) {
+        if (astroids[asteroidIndex].isPowerUp()) {
+            if (astroids[asteroidIndex] instanceof PowerUpAstroid) {
+                ufo.gunPowerUp();
+                astroids[asteroidIndex].setAstroid(-250, -250);
+            }
+        } else if (!ufo.exploded) {
+            ufo.explode();
+            playSound("explosion.wav", false, -20f);
+            backgroundMusic.stop();
+
+            // Clear all asteroids from screen after explosion
+            for (int j = 0; j < astroids.length; j++) {
+                astroids[j].setAstroid(-250, -250);
+            }
+
+            window.wait(100);
+            ufo.hideExplosion();
+        }
+    }
+
+    // Handles laser-asteroid collisions and awards points
+    private void checkLaserCollision(int asteroidIndex) {
+        ArrayList<Laser> activeLasers = ufo.getActiveLasers();
+        for (int l = 0; l < activeLasers.size(); l++) {
+            if (ufo.laserIntersects(astroids[asteroidIndex].getAstroid(), activeLasers.get(l))) {
+                // Award points based on asteroid type plus bonus for shooting
+                increaseScore(astroids[asteroidIndex].getScoreValue() + 20);
+
+                // Remove destroyed asteroid and generate a new one
+                astroids[asteroidIndex].setAstroid(-250, -250);
+                astroidRandomizer(asteroidIndex);
+                astroidStartPosition(asteroidIndex);
+
+                // Remove the laser beam that hit the asteroid
+                activeLasers.get(l).setHidden(true);
+                break;
+            }
+        }
+    }
+
+    // Updates the player's score and refreshes the display
     public void increaseScore(int pScore) {
         scoreValue = scoreValue + pScore;
         score.setText("Score: " + scoreValue);
     }
 
-    // I have not made this music or the method my self made, I just found it on the
-    // internet and it works well
+    // Audio system for game sounds and music
     private void playSound(String musicFileName, boolean loop, float volume) {
         try {
             File musicFile = new File(musicFileName);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(musicFile);
 
             if (loop) {
-                // For looping sounds (background music), use the class variable
+                // Background music that plays continuously
                 backgroundMusic = AudioSystem.getClip();
                 backgroundMusic.open(audioStream);
 
-                // Add volume control
+                // Adjust volume level for background music
                 FloatControl volumeControl = (FloatControl) backgroundMusic.getControl(FloatControl.Type.MASTER_GAIN);
                 volumeControl.setValue(volume);
 
                 backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
             } else {
-                // For one-time sounds, create a new Clip
+                // One-time sound effects (explosions, power-ups, etc.)
                 Clip soundClip = AudioSystem.getClip();
                 soundClip.open(audioStream);
 
-                // Add volume control
+                // Adjust volume for sound effects
                 FloatControl volumeControl = (FloatControl) soundClip.getControl(FloatControl.Type.MASTER_GAIN);
                 volumeControl.setValue(volume);
 
@@ -74,108 +139,66 @@ public class Ufoprogramm {
         }
     }
 
+    // Main game loop that handles game states and player input
     public void loop() {
         boolean running = true;
 
         while (running) {
-            // Reset game state
-            // Initialize the score Text object
-            score.setColor(new Color(255, 255, 255)); // Explicit RGB white color
+            // Reset game state for a new round
+            score.setColor(new Color(255, 255, 255));
             astroidStartPosition();
             ufo.setUfo(150 - (ufo.getWidth() / 2), 800 - 100);
-            ufo.exploded = false; // Make sure to reset the exploded state
+            ufo.exploded = false;
             gameRunning = false;
             ufo.getUfo().setHidden(false);
 
-            // Print a message to help debug
             System.out.println("Waiting for Enter key to start game...");
 
-            // Wait for player to start game
+            // Wait for player to press Enter to begin the game
             while (!gameRunning) {
-                scoreValue = 0; // Reset score value
+                scoreValue = 0;
                 score.setText("Score: " + scoreValue);
                 if (window.keyEnterPressed()) {
                     gameRunning = true;
                     System.out.println("Game started!");
 
-                    // Stop any existing music and restart it
+                    // Restart background music
                     if (backgroundMusic != null) {
                         backgroundMusic.stop();
                     }
                     playSound("background.wav", true, -20f);
                 }
-                window.wait(10); // Slightly longer wait to reduce CPU usage
+                window.wait(10);
             }
 
-            // Main game loop
+            // Active gameplay loop - runs until player's UFO is destroyed
             while (gameRunning) {
                 astroidFall();
                 checkInput();
                 checkCollision();
 
-                // If UFO exploded, break out of this loop to restart
                 if (ufo.exploded) {
                     System.out.println("UFO exploded! Restarting game...");
                     gameRunning = false;
-                    window.wait(1000); // Pause briefly before restart
-                    break; // Exit this loop, which will restart from the outer loop
-                }
-
-            }
-        }
-    }
-
-    public void checkCollision() {
-        // check if ufo is colliding with astroid
-        for (int i = 0; i < astroids.length; i++) {
-            if (astroids[i].isColliding()) {
-                if (astroids[i].isPowerUp()) {
-                    // Handle power-up collision
-                    if (astroids[i] instanceof PowerUpAstroid) {
-                        ufo.gunPowerUp();
-                        astroids[i].setAstroid(-250, -250); // Move it off-screen
-                        // playSound("powerup.wav", false, -20f);
-                    }
-                } else {
-                    // Handle normal collision
-                    if (ufo.exploded == false) {
-                        ufo.explode();
-                        playSound("explosion.wav", false, -20f);
-                        backgroundMusic.stop();
-                        for (int j = 0; j < astroids.length; j++) {
-                            astroids[j].setAstroid(-250, -250);
-                        }
-                        window.wait(100);
-                        ufo.hideExplosion();
-                    }
-                }
-            }
-            for (int l = 0; l < ufo.getActiveLasers().size(); l++) {
-                if (ufo.laserIntersects(astroids[i].getAstroid(), ufo.getActiveLasers().get(l))) {
-                    // Handle laser collision
-                    increaseScore(astroids[i].getScoreValue() + 20);
-                    astroids[i].setAstroid(-250, -250); // Move it off-screen
-                    laser.setLaser(-250); // Move laser off-screen
-
-                    // Add these lines to ensure new asteroids spawn after destruction
-                    astroidRandomizer(i);
-                    astroidStartPosition(i);
+                    window.wait(1000);
+                    break;
                 }
             }
         }
     }
 
+    // Processes keyboard input for UFO movement and laser firing
     public void checkInput() {
         double moveAmount = 1;
         if (window.keyPressed('a')) {
             if (ufo.getUfo().getShapeX() - moveAmount < 0) {
-                moveAmount = 0; // stop ufo from moving if it would be out of screen
+                moveAmount = 0; // Prevent UFO from moving off the left edge
             }
             ufo.ufoMove(-moveAmount);
         }
         if (window.keyPressed('d')) {
             if (ufo.getUfo().getShapeX() + ufo.getWidth() + moveAmount > window.getWidth()) {
-                moveAmount = 0; // stop ufo from moving if it would be out of screen
+                moveAmount = 0; // Prevent UFO from moving off the right edge
             }
             ufo.ufoMove(moveAmount);
         }
@@ -184,91 +207,95 @@ public class Ufoprogramm {
         }
     }
 
+    // Updates positions of all asteroids
     public void astroidFall() {
-        // overload for easier use
         for (int i = 0; i < astroids.length; i++) {
             astroidFall(i);
         }
     }
 
+    // Moves a specific asteroid and checks if it's gone off-screen
     public void astroidFall(int astroidPosition) {
-        // move astroid down
         Astroid astroid = astroids[astroidPosition];
+        // Update asteroid position with both vertical and horizontal movement
         astroid.setAstroid(astroid.getAstroid().getShapeX() + astroid.getXSpeed(),
                 astroid.getAstroid().getShapeY() + astroid.getSpeed());
-        // check if astroid is out of screen
+
+        // If asteroid has moved past the bottom of the screen
         if (astroid.getAstroid().getShapeY() > 800) {
-            // resets astroid to start position
+            // Award points for successfully avoiding the asteroid
             handleScore(astroidPosition);
+            // Create a new random asteroid type
             astroidRandomizer(astroidPosition);
+            // Position the new asteroid at the top of the screen
             astroidStartPosition(astroidPosition);
         }
         window.wait(1);
     }
 
+    // Awards points when an asteroid passes the bottom of the screen
     public void handleScore(int astroidPosition) {
-        // increase score depending on astroid type
         increaseScore(astroids[astroidPosition].getScoreValue());
     }
 
+    // Randomly selects which type of asteroid to create based on difficulty weights
     public void astroidRandomizer(int astroidPosition) {
-        // replace astroid with random special astroid
         int astroidType = (int) (Math.random() * 100) + 1;
 
-        // Regular asteroids (85% chance)
+        // Regular asteroids - most common (85% chance)
         if (astroidType <= 85) {
             astroids[astroidPosition] = new Astroid(-250, -250, 1, ufo);
             return;
         }
 
-        // Fast asteroids (10% chance)
+        // Fast asteroids - moderate challenge (10% chance)
         if (astroidType <= 95) {
             astroids[astroidPosition] = new FastAstroid(-250, -250, 1, ufo);
             return;
         }
 
-        // ZigZag asteroids (3% chance - reduced because they're difficult)
+        // ZigZag asteroids - difficult to avoid (3% chance)
         if (astroidType <= 98) {
             astroids[astroidPosition] = new ZigZagAstroid(-250, -250, 1, ufo);
             return;
         }
 
-        // Power-up asteroids (2% chance - reduced frequency)
+        // Power-up asteroids - rare bonus (2% chance)
         astroids[astroidPosition] = new PowerUpAstroid(-250, -250, 1, ufo);
     }
 
+    // Positions an asteroid at the top of the screen with random X coordinate
     public void astroidStartPosition(int astroidPosition) {
-        // random start position with at least 10px distance to the edge or another
-        // astroid
         Astroid astroid = astroids[astroidPosition];
-        // random x position in bounds of screen with at least 10px from borders
+
+        // Calculate random X position within screen boundaries
         int x = (int) (Math.random() * (window.getWidth() - astroid.getWidth() - 20) + 10);
+        // Position above the top of the screen with random offset
         int y = (int) ((-Math.random() * 150) - 50);
         astroid.setAstroid(x, y);
-        // check if astroid is too close to another astroid
+
+        // Ensure asteroids aren't too close to each other to prevent clumping
         for (int i = 0; i < astroids.length; i++) {
             if (i != astroidPosition) {
                 if (Math.abs(x - astroids[i].getAstroid().getShapeX()) < 30
                         || Math.abs(x + astroid.getWidth() - astroids[i].getAstroid().getShapeX()) < 30) {
-                    astroidStartPosition(astroidPosition);
+                    astroidStartPosition(astroidPosition); // Recursively try a new position
                     return;
                 }
-
             }
-
         }
         astroid.getAstroid().setHidden(false);
     }
 
+    // Positions all asteroids at the start of the game
     public void astroidStartPosition() {
-        // overload for easier use
         for (int i = 0; i < astroids.length; i++) {
             astroidStartPosition(i);
         }
     }
 
+    // Updates the laser object reference when needed
     public void overwiriteLaser(Laser newLaser) {
-        // overwrites laser with new laser
         laser = newLaser;
     }
 
