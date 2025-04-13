@@ -1,5 +1,4 @@
 import sas.*;
-import java.awt.Color;
 import java.util.ArrayList;
 
 public class Ufo {

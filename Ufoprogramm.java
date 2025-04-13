@@ -2,13 +2,11 @@ import sas.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.awt.Color.*;
 import javax.sound.sampled.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
-//import java.awt.color.*;
 public class Ufoprogramm {
+    private static final String HIGH_SCORE_FILE = "highscore.txt";
     View window;
     Picture background;
     Astroid astroids[] = new Astroid[3];
@@ -142,7 +140,8 @@ public class Ufoprogramm {
     // Main game loop that handles game states and player input
     public void loop() {
         boolean running = true;
-
+        int highScore = getHighScore();
+        System.out.println("High Score: " + highScore);
         while (running) {
             // Reset game state for a new round
             score.setColor(new Color(255, 255, 255));
@@ -180,11 +179,51 @@ public class Ufoprogramm {
                 if (ufo.exploded) {
                     System.out.println("UFO exploded! Restarting game...");
                     gameRunning = false;
+                    // Make sure the class name matches exactly
+                    saveHighScore(scoreValue);
                     window.wait(1000);
                     break;
                 }
             }
         }
+    }
+
+    public static void saveHighScore(int score) {
+        // Only save if the new score is higher than the current high score
+        int currentHighScore = getHighScore();
+        if (score > currentHighScore) {
+            try {
+                FileWriter writer = new FileWriter(HIGH_SCORE_FILE);
+                writer.write(String.valueOf(score));
+                writer.close();
+                System.out.println("New high score saved: " + score);
+            } catch (IOException e) {
+                System.err.println("Error saving high score: " + e.getMessage());
+            }
+        }
+    }
+
+    public static int getHighScore() {
+        int highScore = 0;
+        try {
+            File file = new File(HIGH_SCORE_FILE);
+            if (!file.exists()) {
+                return 0; // Return 0 if file doesn't exist yet
+            }
+
+            FileReader reader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            String line = bufferedReader.readLine();
+            if (line != null) {
+                highScore = Integer.parseInt(line);
+            }
+            bufferedReader.close();
+        } catch (IOException e) {
+            System.err.println("Error reading high score: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid high score format: " + e.getMessage());
+        }
+        return highScore;
     }
 
     // Processes keyboard input for UFO movement and laser firing

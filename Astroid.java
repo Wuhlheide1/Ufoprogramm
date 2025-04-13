@@ -8,13 +8,11 @@ public class Astroid {
     private double speed = 1.5, xSpeed = 0;
     private int scoreValue = 20;
     private boolean isPowerUp = false;
-    private Ufo cUfo;
 
     public Astroid(double pX, double pY, double pScale, Ufo pUfo) {
         astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "Astroid.png");
         scale = pScale;
         ufo = pUfo.getUfo();
-        cUfo = pUfo;
         astroid.setHidden(false);
     }
 
