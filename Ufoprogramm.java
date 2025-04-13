@@ -8,6 +8,7 @@ import java.io.*;
 public class Ufoprogramm {
     private static final String HIGH_SCORE_FILE = "highscore.txt";
     View window;
+    GameOver gameOverScreen;
     Picture background;
     Astroid astroids[] = new Astroid[3];
     FastAstroid fastAstroid;
@@ -24,7 +25,9 @@ public class Ufoprogramm {
         background = new Picture(0, 0, "hintergrund.png");
 
         // Initialize laser object for UFO weapons system
-        laser = new Laser(0, 0, 1);
+        laser = new Laser(-20, 0, 1);
+        gameOverScreen = new GameOver(ufo);
+        gameOverScreen.hideGameOver(true);
 
         // Create player UFO and center it at the bottom of the screen
         ufo = new Ufo(150, 800 - 100, 1, laser, this);
@@ -138,6 +141,47 @@ public class Ufoprogramm {
         }
     }
 
+    public void gameNotRunning() {
+        restartGame();
+        System.out.println("Game started!");
+    }
+
+    // Handles restarting the game after game over
+    public void restartGame() {
+        gameOverScreen.hideGameOver(true);
+        ufo.exploded = false;
+        gameRunning = true;
+
+        // Reset score and game elements
+        scoreValue = 0;
+        score.setText("Score: " + scoreValue);
+        score.setHidden(false);
+        ufo.getUfo().setHidden(false);
+
+        // Clear all active lasers
+        for (Laser laser : ufo.getActiveLasers()) {
+            laser.setHidden(true);
+        }
+        ufo.getActiveLasers().clear();
+
+        // Reset asteroids
+        for (int i = 0; i < astroids.length; i++) {
+            astroids[i].setAstroid(-250, -250);
+        }
+        astroidStartPosition();
+
+        // Reset UFO position
+        ufo.setUfo(150 - (ufo.getWidth() / 2), 800 - 100);
+
+        // Restart background music
+        if (backgroundMusic != null) {
+            backgroundMusic.stop();
+        }
+        playSound("background.wav", true, -20f);
+
+        System.out.println("Game restarted!");
+    }
+
     // Main game loop that handles game states and player input
     public void loop() {
         boolean running = true;
@@ -146,29 +190,12 @@ public class Ufoprogramm {
         while (running) {
             // Reset game state for a new round
             score.setColor(new Color(255, 255, 255));
-            astroidStartPosition();
-            ufo.setUfo(150 - (ufo.getWidth() / 2), 800 - 100);
-            ufo.exploded = false;
-            gameRunning = false;
-            ufo.getUfo().setHidden(false);
-
-            System.out.println("Waiting for Enter key to start game...");
+            ufo.setHidden(true);
+            gameOverScreen.hideGameOver(true);
 
             // Wait for player to press Enter to begin the game
             while (!gameRunning) {
-                scoreValue = 0;
-                score.setText("Score: " + scoreValue);
-                if (window.keyEnterPressed()) {
-                    gameRunning = true;
-                    System.out.println("Game started!");
-
-                    // Restart background music
-                    if (backgroundMusic != null) {
-                        backgroundMusic.stop();
-                    }
-                    playSound("background.wav", true, -20f);
-                }
-                window.wait(10);
+                gameNotRunning();
             }
 
             // Active gameplay loop - runs until player's UFO is destroyed
@@ -176,14 +203,35 @@ public class Ufoprogramm {
                 astroidFall();
                 checkInput();
                 checkCollision();
+                gameOverScreen.hideGameOver(running);
 
                 if (ufo.exploded) {
+                    boolean gameOver = true;
                     System.out.println("UFO exploded! Restarting game...");
                     gameRunning = false;
                     // Make sure the class name matches exactly
                     saveHighScore(scoreValue);
+                    gameOverScreen.setHighScore(getHighScore());
+                    gameOverScreen.setScore(scoreValue);
                     window.wait(1000);
-                    break;
+                    gameOverScreen.hideGameOver(false);
+                    score.setHidden(true);
+                    while (gameOver) {
+                        boolean restartGame = gameOverScreen.restartClicked();
+                        if (restartGame) {
+                            restartGame();
+                            running = true;
+                            gameOver = false; // Break out of game over loop
+                            break;
+                        }
+                        boolean quitGame = gameOverScreen.quitClicked();
+                        if (quitGame) {
+                            gameOver = false;
+                            running = true;
+                            break;
+                        }
+                        window.wait(10);
+                    }
                 }
             }
         }

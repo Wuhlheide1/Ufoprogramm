@@ -146,4 +146,8 @@ public class Ufo {
     public boolean laserIntersects(Picture object, Laser laser) {
         return laser.laserIntersects(object);
     }
+
+    public void setHidden(boolean hidden) {
+        ufo.setHidden(hidden);
+    }
 }
