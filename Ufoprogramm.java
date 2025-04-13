@@ -192,6 +192,7 @@ public class Ufoprogramm {
 
         // Ensure game over screen is hidden at startup
         gameOverScreen.hideGameOver(true);
+        gameOverScreen.moveGameOver(300, 0);
 
         while (running) {
             // Reset game state for a new round
@@ -208,7 +209,8 @@ public class Ufoprogramm {
                 astroidFall();
                 checkInput();
                 checkCollision();
-                gameOverScreen.hideGameOver(running);
+                // Don't hide game over screen during gameplay - it should only be hidden/shown
+                // at specific times
 
                 if (ufo.exploded) {
                     boolean gameOver = true;
@@ -219,7 +221,6 @@ public class Ufoprogramm {
                     gameOverScreen.setHighScore(getHighScore());
                     gameOverScreen.setScore(scoreValue);
                     window.wait(1000);
-                    gameOverScreen.moveGameOver(300, 0);
                     gameOverScreen.hideGameOver(false);
                     score.setHidden(true);
                     while (gameOver) {
