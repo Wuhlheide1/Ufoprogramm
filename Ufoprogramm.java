@@ -62,6 +62,7 @@ public class Ufoprogramm {
         if (astroids[asteroidIndex].isPowerUp()) {
             if (astroids[asteroidIndex] instanceof PowerUpAstroid) {
                 ufo.gunPowerUp();
+                playSound("powerup.wav", false, -20f);
                 astroids[asteroidIndex].setAstroid(-250, -250);
             }
         } else if (!ufo.exploded) {
@@ -91,7 +92,7 @@ public class Ufoprogramm {
                 astroids[asteroidIndex].setAstroid(-250, -250);
                 astroidRandomizer(asteroidIndex);
                 astroidStartPosition(asteroidIndex);
-
+                playSound("explosion.wav", false, -20f);
                 // Remove the laser beam that hit the asteroid
                 activeLasers.get(l).setHidden(true);
                 break;
@@ -312,10 +313,12 @@ public class Ufoprogramm {
         // Position above the top of the screen with random offset
         int y = (int) ((-Math.random() * 150) - 50);
         astroid.setAstroid(x, y);
+        astroid.getAstroid().setHidden(false); // Make sure asteroid is visible
 
         // Ensure asteroids aren't too close to each other to prevent clumping
         for (int i = 0; i < astroids.length; i++) {
-            if (i != astroidPosition) {
+            if (i != astroidPosition && astroids[i].getAstroid().getShapeY() > -250) { // Only check if asteroid is
+                                                                                       // active
                 if (Math.abs(x - astroids[i].getAstroid().getShapeX()) < 30
                         || Math.abs(x + astroid.getWidth() - astroids[i].getAstroid().getShapeX()) < 30) {
                     astroidStartPosition(astroidPosition); // Recursively try a new position
@@ -323,7 +326,6 @@ public class Ufoprogramm {
                 }
             }
         }
-        astroid.getAstroid().setHidden(false);
     }
 
     // Positions all asteroids at the start of the game
