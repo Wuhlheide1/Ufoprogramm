@@ -3,6 +3,7 @@ import sas.*;
 public class Shield {
     Picture shield;
     double shieldWidth;
+    private boolean blinked = false;
 
     Shield(double pX, double pY, double pScale) {
         shield = new Picture(pX, pY, 55 * pScale, 55 * pScale, "Shield2.png");
@@ -32,5 +33,17 @@ public class Shield {
 
     public Picture getShape() {
         return shield;
+    }
+
+    public void blink() {
+        if (!blinked) {
+            shield.setHidden(true);
+            shield = new Picture(shield.getShapeX(), shield.getShapeY(), 55 * 1, 55 * 1, "Shield2.png");
+            blinked = true;
+        } else {
+            shield.setHidden(true);
+            shield = new Picture(shield.getShapeX(), shield.getShapeY(), 55 * 1, 55 * 1, "Shield.png");
+            blinked = false;
+        }
     }
 }

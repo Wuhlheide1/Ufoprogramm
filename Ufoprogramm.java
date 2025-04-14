@@ -362,13 +362,13 @@ public class Ufoprogramm {
     // Processes keyboard input for UFO movement and laser firing
     public void checkInput() {
         double moveAmount = 1;
-        if (window.keyPressed('a')) {
+        if (window.keyPressed('a') || window.keyLeftPressed()) {
             if (ufo.getUfo().getShapeX() - moveAmount < 0) {
                 moveAmount = 0; // Prevent UFO from moving off the left edge
             }
             ufo.ufoMove(-moveAmount);
         }
-        if (window.keyPressed('d')) {
+        if (window.keyPressed('d') || window.keyRightPressed()) {
             if (ufo.getUfo().getShapeX() + ufo.getWidth() + moveAmount > window.getWidth()) {
                 moveAmount = 0; // Prevent UFO from moving off the right edge
             }

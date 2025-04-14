@@ -203,8 +203,29 @@ public class Ufo {
             long startTime = System.currentTimeMillis();
             try {
                 // Continuously update shield position while active
+                int count = 0;
+                int initialBlinkSpeed = 100; // Starting blink interval
+                int minBlinkSpeed = 15;      // Fastest blink interval we want to reach
                 while (System.currentTimeMillis() - startTime < time) {
                     shield.centerOnUfo(this);
+                    // Check if shield is about to expire (last 3 seconds)
+                    long remainingTime = time - (System.currentTimeMillis() - startTime);
+                    if(remainingTime < 3000){
+                        count++;
+                        // Calculate current blink speed using a non-linear equation
+                        // This creates a smooth acceleration curve that starts slow and gradually speeds up
+                        // 3000ms = full warning period, remainingTime = time left in ms
+                        double progress = 1.0 - (remainingTime / 3000.0); // 0.0 to 1.0 (start to end)
+                        // Apply a quadratic curve for natural acceleration feel
+                        double speedFactor = Math.pow(progress, 1.5); // Adjust exponent for curve shape
+                        // Calculate current blink speed - starts at initialBlinkSpeed, approaches minBlinkSpeed
+                        int currentBlinkSpeed = (int)(initialBlinkSpeed - (speedFactor * (initialBlinkSpeed - minBlinkSpeed)));
+                        
+                        if (count >= currentBlinkSpeed) {
+                            count = 0;
+                            shield.blink();
+                        }
+                    }
                     Thread.sleep(10); // Update position every 10ms
                 }
                 isShieldActive = false;
