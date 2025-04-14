@@ -73,6 +73,7 @@ public class Ufoprogramm {
         // Initialize game over screen after UFO is created
         gameOverScreen = new GameOver(ufo);
         gameOverScreen.hideGameOver(true);
+        
 
         // Create asteroid objects and position them off-screen initially
         for (int i = 0; i < astroids.length; i++) {
@@ -576,8 +577,10 @@ public class Ufoprogramm {
                 int x = (int)(section * sectionIndex + Math.random() * section);
                 largeStars[i].moveTo(x, 0);
             }
-        }
+        }     
     }
+    
+
 
     public static void main(String[] args) {
         new Ufoprogramm();

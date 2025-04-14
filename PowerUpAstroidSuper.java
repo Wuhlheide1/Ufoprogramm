@@ -2,7 +2,7 @@ import sas.*;
 
 // FastlAstroid is a child class of Astroid
 public class PowerUpAstroidSuper extends Astroid {
-    double speed = 1;
+    double speed = 2;
     int scoreValue = 0;
     boolean isPowerUp = true; // set to true for powerup astroid, false for normal astroid
     boolean isActive = false; // set to true when powerup is active, false when powerup is not active
