@@ -25,9 +25,9 @@ public class Ufoprogramm {
     // Constructor - Sets up the game environment and initializes all game objects
     Ufoprogramm() {
         window = new View(300, 800, "Ufo");
-        background = new Picture(0, 0, "hintergrund.png");
-        parallax[0] = new Picture(-540, 0, 1080, 1080, "parallax1.png");
-        parallax[1] = new Picture(-540, 0, 1080, 1080, "parallax2.png");
+        background = new Picture(0, 0, "parallax1.png");
+        // parallax[0] = new Picture(-270, 0, 540, 540, "parallax1.png");
+        // parallax[1] = new Picture(-270, 0, 540, 540, "parallax2.png");
 
         // Initialize laser object for UFO weapons system
         laser = new Laser(-20, 0, 1);
