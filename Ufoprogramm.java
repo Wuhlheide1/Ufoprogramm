@@ -66,9 +66,19 @@ public class Ufoprogramm {
     private void handleUfoCollision(int asteroidIndex) {
         if (astroids[asteroidIndex].isPowerUp()) {
             if (astroids[asteroidIndex] instanceof PowerUpAstroid) {
+
+                ufo.disableMultiShoot();
                 ufo.gunPowerUp();
+
                 playSound("powerup.wav", false, -20f);
                 astroids[asteroidIndex].setAstroid(-250, -250);
+            } else if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
+                if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
+                    ufo.enableMultiShoot();
+                    ufo.gunPowerUp();
+                    playSound("powerup.wav", false, -20f);
+                    astroids[asteroidIndex].setAstroid(-250, -250);
+                }
             }
         } else if (!ufo.exploded) {
             ufo.explode();
@@ -297,8 +307,17 @@ public class Ufoprogramm {
             }
             ufo.ufoMove(moveAmount);
         }
+
+        if (window.keyPressed('c')) {
+            // Increase power-up spawn rate for 60 seconds
+            increasePowerUpSpawnRate(60);
+        }
         if (ufo.isGunPoweredUp()) {
-            ufo.shootLaser();
+            if (ufo.isMultiShoot()) {
+                ufo.multishoot();
+            } else {
+                ufo.shootLaser();
+            }
         }
     }
 
@@ -334,29 +353,39 @@ public class Ufoprogramm {
     }
 
     // Randomly selects which type of asteroid to create based on difficulty weights
+    // Add these class variables
+    private int regularAstroidChance = 85;
+    private int fastAstroidChance = 10;
+    private int zigZagAstroidChance = 3;
+    private int powerUpChance = 2;
+
     public void astroidRandomizer(int astroidPosition) {
         int astroidType = (int) (Math.random() * 100) + 1;
 
-        // Regular asteroids - most common (85% chance)
-        if (astroidType <= 85) {
+        // Regular asteroids
+        if (astroidType <= regularAstroidChance) {
             astroids[astroidPosition] = new Astroid(-250, -250, 1, ufo);
             return;
         }
 
-        // Fast asteroids - moderate challenge (10% chance)
-        if (astroidType <= 95) {
+        // Fast asteroids
+        if (astroidType <= regularAstroidChance + fastAstroidChance) {
             astroids[astroidPosition] = new FastAstroid(-250, -250, 1, ufo);
             return;
         }
 
-        // ZigZag asteroids - difficult to avoid (3% chance)
-        if (astroidType <= 98) {
+        // ZigZag asteroids
+        if (astroidType <= regularAstroidChance + fastAstroidChance + zigZagAstroidChance) {
             astroids[astroidPosition] = new ZigZagAstroid(-250, -250, 1, ufo);
             return;
         }
 
-        // Power-up asteroids - rare bonus (2% chance)
-        astroids[astroidPosition] = new PowerUpAstroid(-250, -250, 1, ufo);
+        // Power-up asteroids
+        Astroid powerUp = new PowerUpAstroid(-250, -250, 1, ufo);
+        if ((int) (Math.random() * 100) + 1 <= 40) {
+            powerUp = new PowerUpAstroidSuper(-250, -250, 1, ufo);
+        }
+        astroids[astroidPosition] = powerUp;
     }
 
     // Positions an asteroid at the top of the screen with random X coordinate
@@ -393,6 +422,40 @@ public class Ufoprogramm {
     // Updates the laser object reference when needed
     public void overwiriteLaser(Laser newLaser) {
         laser = newLaser;
+    }
+
+    // Temporary method for testing power-up spawn rate
+    public void increasePowerUpSpawnRate(int durationSeconds) {
+        new Thread(() -> {
+            // Backup original probabilities
+            final int originalRegular = regularAstroidChance;
+            final int originalFast = fastAstroidChance;
+            final int originalZigZag = zigZagAstroidChance;
+            final int originalPowerUp = powerUpChance;
+
+            // Set new probabilities (50% power-up chance)
+            regularAstroidChance = 40;
+            fastAstroidChance = 5;
+            zigZagAstroidChance = 2;
+            powerUpChance = 53;
+
+            try {
+                // Apply increased spawn rate
+                System.out.println("Increased power-up spawn rate activated!");
+
+                // Wait for the specified duration
+                Thread.sleep(durationSeconds * 1000);
+
+                // Restore original probabilities
+                regularAstroidChance = originalRegular;
+                fastAstroidChance = originalFast;
+                zigZagAstroidChance = originalZigZag;
+                powerUpChance = originalPowerUp;
+                System.out.println("Power-up spawn rate restored to normal");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public static void main(String[] args) {

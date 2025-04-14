@@ -8,6 +8,7 @@ public class Astroid {
     private double speed = 1.5, xSpeed = 0;
     private int scoreValue = 20;
     private boolean isPowerUp = false;
+    private boolean isActive = false;
 
     public Astroid(double pX, double pY, double pScale, Ufo pUfo) {
         astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "Astroid.png");
@@ -50,6 +51,10 @@ public class Astroid {
 
     public boolean isPowerUp() {
         return isPowerUp;
+    }
+
+    public boolean isActive() {
+        return isActive;
     }
 
 }

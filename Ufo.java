@@ -13,7 +13,9 @@ public class Ufo {
     Ufoprogramm ufoprogramm;
     // Add these fields to track multiple lasers
     private ArrayList<Laser> activeLasers = new ArrayList<>();
-    private final int MAX_LASERS = 10; // Maximum number of lasers allowed at once
+    private final int singleLaserAmount = 10;
+    private int MAX_LASERS = 10; // Maximum number of lasers allowed at once
+    private boolean isMultiShoot = false;
 
     Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
         ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rakete.png");
@@ -32,6 +34,70 @@ public class Ufo {
 
     public Picture getUfo() {
         return ufo;
+    }
+
+    public void multishoot() {
+        // Save the current time
+        MAX_LASERS = singleLaserAmount * 3;
+
+        // Only proceed if gun is powered up and cooldown has passed
+        if (isGunPoweredUp && System.currentTimeMillis() - lastShotTime > SHOT_INTERVAL) {
+            lastShotTime = System.currentTimeMillis();
+
+            // Create and fire each laser independently
+            createAndFireLaser(0); // Center laser
+            createAndFireLaser(-30); // Left laser
+            createAndFireLaser(30); // Right laser
+        }
+    }
+
+    public void shootLaser() {
+        shootLaser(0); // Default offset is centered on the UFO
+    }
+
+    public void shootLaser(double pOffsetX) {
+        if (isGunPoweredUp && System.currentTimeMillis() - lastShotTime > SHOT_INTERVAL) {
+            lastShotTime = System.currentTimeMillis();
+            createAndFireLaser(pOffsetX);
+        }
+    }
+
+    // Helper method to create and fire a single laser with an offset
+    private void createAndFireLaser(double offsetX) {
+        // Calculate center position of UFO
+        double ufoCenterX = ufo.getShapeX() + (ufo.getShapeWidth() / 2);
+
+        // Create a new laser
+        Laser newLaser = new Laser((ufoCenterX - (2 * scale) / 2) + offsetX, ufo.getShapeY(), scale);
+        newLaser.getLaser().setHidden(false);
+
+        // Add to active lasers list (remove oldest if at capacity)
+        if (activeLasers.size() >= MAX_LASERS) {
+            Laser oldLaser = activeLasers.remove(0);
+            oldLaser.setHidden(true);
+        }
+        activeLasers.add(newLaser);
+
+        // Update the current laser reference for collision detection
+        currentLaser = newLaser;
+        ufoprogramm.overwiriteLaser(currentLaser);
+
+        // Start a thread to move this specific laser
+        new Thread(() -> {
+            Laser thisLaser = newLaser;
+            try {
+                while (thisLaser.getY() > -50) { // Allow to go slightly off-screen
+                    thisLaser.move(-10);
+                    Thread.sleep(50);
+                }
+                // Remove and hide when done
+                thisLaser.setHidden(true);
+                activeLasers.remove(thisLaser);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                thisLaser.setHidden(true);
+            }
+        }).start();
     }
 
     public void setUfoPosition(double pX, double pY) {
@@ -89,47 +155,6 @@ public class Ufo {
         }).start();
     }
 
-    public void shootLaser() {
-        if (isGunPoweredUp && System.currentTimeMillis() - lastShotTime > SHOT_INTERVAL) {
-            lastShotTime = System.currentTimeMillis();
-
-            // Calculate center position of UFO
-            double ufoCenterX = ufo.getShapeX() + (ufo.getShapeWidth() / 2);
-
-            // Create a new laser
-            Laser newLaser = new Laser(ufoCenterX - (2 * scale) / 2, ufo.getShapeY(), scale);
-            newLaser.getLaser().setHidden(false);
-
-            // Add to active lasers list (remove oldest if at capacity)
-            if (activeLasers.size() >= MAX_LASERS) {
-                Laser oldLaser = activeLasers.remove(0);
-                oldLaser.setHidden(true);
-            }
-            activeLasers.add(newLaser);
-
-            // Update the current laser reference for collision detection
-            currentLaser = newLaser;
-            ufoprogramm.overwiriteLaser(currentLaser);
-
-            // Start a thread to move this specific laser
-            new Thread(() -> {
-                Laser thisLaser = newLaser;
-                try {
-                    while (thisLaser.getY() > -50) { // Allow to go slightly off-screen
-                        thisLaser.move(-10);
-                        Thread.sleep(50);
-                    }
-                    // Remove and hide when done
-                    thisLaser.setHidden(true);
-                    activeLasers.remove(thisLaser);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    thisLaser.setHidden(true);
-                }
-            }).start();
-        }
-    }
-
     // Add this method to get all active lasers for collision detection
     public ArrayList<Laser> getActiveLasers() {
         return activeLasers;
@@ -149,5 +174,17 @@ public class Ufo {
 
     public void setHidden(boolean hidden) {
         ufo.setHidden(hidden);
+    }
+
+    public void enableMultiShoot() {
+        isMultiShoot = true;
+    }
+
+    public void disableMultiShoot() {
+        isMultiShoot = false;
+    }
+
+    public boolean isMultiShoot() {
+        return isMultiShoot;
     }
 }
