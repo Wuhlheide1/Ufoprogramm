@@ -10,6 +10,8 @@ public class Ufoprogramm {
     View window;
     GameOver gameOverScreen;
     Picture background;
+    Picture parallax[] = new Picture[2];
+    int parallaxSpeeds[] = { 1, 1 };
     Astroid astroids[] = new Astroid[3];
     FastAstroid fastAstroid;
     Ufo ufo;
@@ -24,6 +26,8 @@ public class Ufoprogramm {
     Ufoprogramm() {
         window = new View(300, 800, "Ufo");
         background = new Picture(0, 0, "hintergrund.png");
+        parallax[0] = new Picture(-540, 0, 1080, 1080, "parallax1.png");
+        parallax[1] = new Picture(-540, 0, 1080, 1080, "parallax2.png");
 
         // Initialize laser object for UFO weapons system
         laser = new Laser(-20, 0, 1);
@@ -242,6 +246,9 @@ public class Ufoprogramm {
 
             // Active gameplay loop - runs until player's UFO is destroyed
             while (gameRunning) {
+                // Update parallax background effect
+                parallax();
+
                 astroidFall();
                 checkInput();
                 checkCollision();
@@ -492,6 +499,8 @@ public class Ufoprogramm {
                 fastAstroidChance = originalFast;
                 zigZagAstroidChance = originalZigZag;
                 powerUpChance = originalPowerUp;
+                powerUpSuperChance = originalPowerUpSuper;
+                shieldPowerUpChance = originalShieldPowerUp;
                 System.out.println("Power-up spawn rate restored to normal");
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -499,7 +508,17 @@ public class Ufoprogramm {
         }).start();
     }
 
+    public void parallax() {
+        // Move parallax layers
+        for (int i = 0; i < parallax.length; i++) {
+            parallax[i].move(0, parallaxSpeeds[i]);
+            if (parallax[i].getShapeY() > 800) {
+                parallax[i].moveTo(parallax[i].getShapeX(), -1080);
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        Ufoprogramm ufoProgramm = new Ufoprogramm();
+        new Ufoprogramm();
     }
 }
