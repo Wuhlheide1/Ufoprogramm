@@ -9,8 +9,9 @@ public class Astroid {
     private int scoreValue = 20;
     private boolean isPowerUp = false;
     private boolean isActive = false;
+    private Shield shield;
 
-    public Astroid(double pX, double pY, double pScale, Ufo pUfo) {
+    public Astroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
         astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "Astroid.png");
         scale = pScale;
         ufo = pUfo.getUfo();
@@ -29,8 +30,16 @@ public class Astroid {
         return astroid;
     }
 
-    public boolean isColliding() {
-        if (astroid.intersects(ufo)) {
+    public boolean isColliding(Ufo ufo) {
+        if (astroid.intersects(ufo.getUfo())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isColliding(Shield shield) {
+        if (astroid.intersects(shield.getShape())) {
             return true;
         } else {
             return false;
@@ -57,4 +66,9 @@ public class Astroid {
         return isActive;
     }
 
+    private int powerUpTime = 10000; // Default power-up time in milliseconds
+
+    public int getPowerUpTime() {
+        return this.powerUpTime;
+    }
 }

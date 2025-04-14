@@ -6,8 +6,8 @@ public class FastAstroid extends Astroid {
     int scoreValue = 30;
 
     // Constructor that calls the parent constructor using super()
-    public FastAstroid(double pX, double pY, double pScale, Ufo pUfo) {
-        super(pX, pY, pScale, pUfo); // Call parent constructor
+    public FastAstroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
+        super(pX, pY, pScale, pUfo, shield); // Call parent constructor
 
         // Create a new Picture with the same position and size but different image
         this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "BlueAstroid.png");

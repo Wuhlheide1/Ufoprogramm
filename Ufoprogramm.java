@@ -18,6 +18,7 @@ public class Ufoprogramm {
     Text score;
     int scoreValue = 0;
     private Laser laser; // Laser object for UFO weapons system
+    Shield shield;
 
     // Constructor - Sets up the game environment and initializes all game objects
     Ufoprogramm() {
@@ -26,6 +27,7 @@ public class Ufoprogramm {
 
         // Initialize laser object for UFO weapons system
         laser = new Laser(-20, 0, 1);
+        // Initialize shield object for UFO
 
         // Create player UFO and center it at the bottom of the screen
         ufo = new Ufo(150, 800 - 100, 1, laser, this);
@@ -37,8 +39,10 @@ public class Ufoprogramm {
 
         // Create asteroid objects and position them off-screen initially
         for (int i = 0; i < astroids.length; i++) {
-            astroids[i] = new Astroid(-250, -250, 1, ufo);
+            astroids[i] = new Astroid(-250, -250, 1, ufo, shield);
         }
+        shield = new Shield(-250, -250, 1);
+        shield.hideShield(true);
 
         // Start background music and initialize score display
         playSound("background.wav", true, -20f);
@@ -53,7 +57,15 @@ public class Ufoprogramm {
     public void checkCollision() {
         for (int i = 0; i < astroids.length; i++) {
             // Detect if UFO has collided with any asteroid
-            if (astroids[i].isColliding()) {
+            if (astroids[i].isColliding(shield)) {
+                powerUpEffect(i);
+                // Hide the shield
+                shield.hideShield(true);
+                // Reset the shield position
+                shield.setPosition(-250, -250);
+                return;
+            }
+            if (astroids[i].isColliding(ufo)) {
                 handleUfoCollision(i);
             }
 
@@ -65,21 +77,23 @@ public class Ufoprogramm {
     // Processes what happens when the UFO collides with an asteroid
     private void handleUfoCollision(int asteroidIndex) {
         if (astroids[asteroidIndex].isPowerUp()) {
+            // Add powerup activation behaviour here
             if (astroids[asteroidIndex] instanceof PowerUpAstroid) {
-
                 ufo.disableMultiShoot();
-                ufo.gunPowerUp();
+                ufo.gunPowerUp(astroids[asteroidIndex]);
+                powerUpEffect(asteroidIndex);
 
-                playSound("powerup.wav", false, -20f);
-                astroids[asteroidIndex].setAstroid(-250, -250);
             } else if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
                 if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
                     ufo.enableMultiShoot();
-                    ufo.gunPowerUp();
-                    playSound("powerup.wav", false, -20f);
-                    astroids[asteroidIndex].setAstroid(-250, -250);
+                    ufo.gunPowerUp(astroids[asteroidIndex]);
+                    powerUpEffect(asteroidIndex);
                 }
+            } else if (astroids[asteroidIndex] instanceof ShieldPowerUp) {
+                ufo.enableShield(astroids[asteroidIndex], shield);
+                powerUpEffect(asteroidIndex);
             }
+
         } else if (!ufo.exploded) {
             ufo.explode();
             playSound("explosion.wav", false, -20f);
@@ -93,6 +107,14 @@ public class Ufoprogramm {
             window.wait(100);
             ufo.hideExplosion();
         }
+    }
+
+    private void powerUpEffect(int asteroidIndex) {
+        playSound("powerup.wav", false, -20f);
+        astroids[asteroidIndex].setAstroid(-250, -250);
+        // experimental
+        astroidRandomizer(asteroidIndex);
+        astroidStartPosition(asteroidIndex);
     }
 
     // Handles laser-asteroid collisions and awards points
@@ -190,6 +212,10 @@ public class Ufoprogramm {
             backgroundMusic.stop();
         }
         playSound("background.wav", true, -20f);
+
+        // Reset shield
+        shield.hideShield(true);
+        shield.setPosition(-250, -250); // Move it off-screen
 
         System.out.println("Game restarted!");
     }
@@ -354,38 +380,49 @@ public class Ufoprogramm {
 
     // Randomly selects which type of asteroid to create based on difficulty weights
     // Add these class variables
-    private int regularAstroidChance = 85;
+    private int regularAstroidChance = 83;
     private int fastAstroidChance = 10;
     private int zigZagAstroidChance = 3;
     private int powerUpChance = 2;
+    private int powerUpSuperChance = 1;
+    private int shieldPowerUpChance = 1;
 
     public void astroidRandomizer(int astroidPosition) {
         int astroidType = (int) (Math.random() * 100) + 1;
 
         // Regular asteroids
         if (astroidType <= regularAstroidChance) {
-            astroids[astroidPosition] = new Astroid(-250, -250, 1, ufo);
+            astroids[astroidPosition] = new Astroid(-250, -250, 1, ufo, shield);
             return;
         }
 
         // Fast asteroids
         if (astroidType <= regularAstroidChance + fastAstroidChance) {
-            astroids[astroidPosition] = new FastAstroid(-250, -250, 1, ufo);
+            astroids[astroidPosition] = new FastAstroid(-250, -250, 1, ufo, shield);
             return;
         }
 
         // ZigZag asteroids
         if (astroidType <= regularAstroidChance + fastAstroidChance + zigZagAstroidChance) {
-            astroids[astroidPosition] = new ZigZagAstroid(-250, -250, 1, ufo);
+            astroids[astroidPosition] = new ZigZagAstroid(-250, -250, 1, ufo, shield);
             return;
         }
 
-        // Power-up asteroids
-        Astroid powerUp = new PowerUpAstroid(-250, -250, 1, ufo);
-        if ((int) (Math.random() * 100) + 1 <= 40) {
-            powerUp = new PowerUpAstroidSuper(-250, -250, 1, ufo);
+        if (astroidType <= regularAstroidChance + fastAstroidChance + zigZagAstroidChance + powerUpChance) {
+            astroids[astroidPosition] = new PowerUpAstroid(-250, -250, 1, ufo, shield);
+            return;
         }
-        astroids[astroidPosition] = powerUp;
+
+        if (astroidType <= regularAstroidChance + fastAstroidChance + zigZagAstroidChance + powerUpChance
+                + powerUpSuperChance) {
+            astroids[astroidPosition] = new PowerUpAstroidSuper(-250, -250, 1, ufo, shield);
+            return;
+        }
+        if (astroidType <= regularAstroidChance + fastAstroidChance + zigZagAstroidChance + powerUpChance
+                + powerUpSuperChance + shieldPowerUpChance) {
+            astroids[astroidPosition] = new ShieldPowerUp(-250, -250, 1, ufo, shield);
+            return;
+        }
     }
 
     // Positions an asteroid at the top of the screen with random X coordinate
@@ -432,12 +469,16 @@ public class Ufoprogramm {
             final int originalFast = fastAstroidChance;
             final int originalZigZag = zigZagAstroidChance;
             final int originalPowerUp = powerUpChance;
+            final int originalPowerUpSuper = powerUpSuperChance;
+            final int originalShieldPowerUp = shieldPowerUpChance;
 
             // Set new probabilities (50% power-up chance)
-            regularAstroidChance = 40;
-            fastAstroidChance = 5;
+            regularAstroidChance = 30;
+            fastAstroidChance = 8;
             zigZagAstroidChance = 2;
-            powerUpChance = 53;
+            powerUpChance = 25;
+            powerUpSuperChance = 10; // Set to 0 to disable the super power-up
+            shieldPowerUpChance = 25; // Set to 0 to disable the shield power-up
 
             try {
                 // Apply increased spawn rate

@@ -9,8 +9,8 @@ public class PowerUpAstroidSuper extends Astroid {
     int powerUpTime = 1000; // time in milliseconds that powerup is active
 
     // Constructor that calls the parent constructor using super()
-    public PowerUpAstroidSuper(double pX, double pY, double pScale, Ufo pUfo) {
-        super(pX, pY, pScale, pUfo); // Call parent constructor
+    public PowerUpAstroidSuper(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
+        super(pX, pY, pScale, pUfo, shield); // Call parent constructor
 
         // Create a new Picture with the same position and size but different image
         this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "RedAstroidSuper.png");
@@ -39,5 +39,10 @@ public class PowerUpAstroidSuper extends Astroid {
     @Override
     public boolean isActive() {
         return isActive;
+    }
+
+    @Override
+    public int getPowerUpTime() {
+        return powerUpTime;
     }
 }

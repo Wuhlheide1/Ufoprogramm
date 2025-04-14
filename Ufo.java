@@ -6,7 +6,7 @@ public class Ufo {
     private double scale;
     public boolean exploded = false;
     private Picture explosion;
-    private boolean isGunPoweredUp = false;
+    private boolean isGunPoweredUp = false, isShieldActive = false;
     private long lastShotTime = 0;
     private final long SHOT_INTERVAL = 200; // milliseconds between shots
     private Laser currentLaser;
@@ -131,7 +131,7 @@ public class Ufo {
         explosion.setHidden(true);
     }
 
-    public void gunPowerUp() {
+    public void gunPowerUp(Astroid asteroid) {
         isGunPoweredUp = true;
         lastShotTime = 0;
         // Clear any existing lasers when power-up starts
@@ -140,9 +140,12 @@ public class Ufo {
         }
         activeLasers.clear();
 
+        // Use default time if asteroid is null or time is invalid
+        int time = (asteroid != null) ? asteroid.getPowerUpTime() : 10000;
+
         new Thread(() -> {
             try {
-                Thread.sleep(10000); // Power-up lasts 10 seconds
+                Thread.sleep(time);
                 isGunPoweredUp = false;
                 // Hide all lasers when power-up ends
                 for (Laser laser : activeLasers) {
@@ -186,5 +189,29 @@ public class Ufo {
 
     public boolean isMultiShoot() {
         return isMultiShoot;
+    }
+
+    public void enableShield(Astroid asteroid, Shield shield) {
+        isShieldActive = true;
+        shield.hideShield(false); // Show the shield first
+
+        // Ensure minimum duration of 10 seconds (10000 milliseconds)
+        int time = (asteroid != null && asteroid.getPowerUpTime() > 0) ? 
+                  asteroid.getPowerUpTime() : 10000;
+
+        new Thread(() -> {
+            long startTime = System.currentTimeMillis();
+            try {
+                // Continuously update shield position while active
+                while (System.currentTimeMillis() - startTime < time) {
+                    shield.centerOnUfo(this);
+                    Thread.sleep(10); // Update position every 10ms
+                }
+                isShieldActive = false;
+                shield.hideShield(true); // Hide the shield when the power-up ends
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }
