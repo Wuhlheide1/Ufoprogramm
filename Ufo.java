@@ -14,7 +14,7 @@ public class Ufo {
     // Add these fields to track multiple lasers
     private ArrayList<Laser> activeLasers = new ArrayList<>();
     private final int singleLaserAmount = 10;
-    private int MAX_LASERS = 10; // Maximum number of lasers allowed at once
+    private int MAX_LASERS = singleLaserAmount; // Maximum number of lasers allowed at once
     private boolean isMultiShoot = false;
 
     Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
@@ -37,9 +37,6 @@ public class Ufo {
     }
 
     public void multishoot() {
-        // Save the current time
-        MAX_LASERS = singleLaserAmount * 3;
-
         // Only proceed if gun is powered up and cooldown has passed
         if (isGunPoweredUp && System.currentTimeMillis() - lastShotTime > SHOT_INTERVAL) {
             lastShotTime = System.currentTimeMillis();
@@ -71,8 +68,11 @@ public class Ufo {
         Laser newLaser = new Laser((ufoCenterX - (2 * scale) / 2) + offsetX, ufo.getShapeY(), scale);
         newLaser.getLaser().setHidden(false);
 
+        // Use base limit for single shoot, triple for multi-shoot
+        int laserLimit = isMultiShoot ? singleLaserAmount * 3 : singleLaserAmount;
+
         // Add to active lasers list (remove oldest if at capacity)
-        if (activeLasers.size() >= MAX_LASERS) {
+        if (activeLasers.size() >= laserLimit) {
             Laser oldLaser = activeLasers.remove(0);
             oldLaser.setHidden(true);
         }

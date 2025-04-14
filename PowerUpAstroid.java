@@ -6,7 +6,7 @@ public class PowerUpAstroid extends Astroid {
     int scoreValue = 0;
     boolean isPowerUp = true; // set to true for powerup astroid, false for normal astroid
     boolean isActive = false; // set to true when powerup is active, false when powerup is not active
-    int powerUpTime = 1000; // time in milliseconds that powerup is active
+    int powerUpTime = 10000; // time in milliseconds that powerup is active
 
     // Constructor that calls the parent constructor using super()
     public PowerUpAstroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
