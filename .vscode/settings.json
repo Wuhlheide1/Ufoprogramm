@@ -1,6 +1,7 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "/Users/maxreif/Documents/Apps/sas.5.7.jar"
+        "/Users/maxreif/Documents/Apps/sas.5.7.jar",
+        "c:\\Users\\sonic\\Downloads\\sas.5.7.jar"
     ]
 }

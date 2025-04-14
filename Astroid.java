@@ -5,7 +5,7 @@ public class Astroid {
     protected Picture astroid;
     private double scale;
     private Picture ufo;
-    private double speed = 1.5, xSpeed = 0;
+    private double speed = 2.5, xSpeed = 0;
     private int scoreValue = 20;
     private boolean isPowerUp = false;
     private boolean isActive = false;

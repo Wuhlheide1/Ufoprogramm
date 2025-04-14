@@ -9,9 +9,14 @@ public class Ufoprogramm {
     private static final String HIGH_SCORE_FILE = "highscore.txt";
     View window;
     GameOver gameOverScreen;
-    Picture background;
-    Picture parallax[] = new Picture[2];
-    int parallaxSpeeds[] = { 1, 1 };
+    Rectangle background;
+    // Star arrays for parallax effect
+    Rectangle[] smallStars = new Rectangle[30]; // Increased from 20 to 30
+    Rectangle[] mediumStars = new Rectangle[15]; // New medium-sized star layer
+    Rectangle[] largeStars = new Rectangle[8]; // Slightly reduced from 10 to 8
+    double[] smallStarSpeeds = { 1 };
+    double[] mediumStarSpeeds = { 1.5};
+    double[] largeStarSpeeds = { 2}; // Increased from 2 to 3
     Astroid astroids[] = new Astroid[3];
     FastAstroid fastAstroid;
     Ufo ufo;
@@ -25,10 +30,38 @@ public class Ufoprogramm {
     // Constructor - Sets up the game environment and initializes all game objects
     Ufoprogramm() {
         window = new View(300, 800, "Ufo");
-        background = new Picture(0, 0, "parallax1.png");
-        // parallax[0] = new Picture(-270, 0, 540, 540, "parallax1.png");
-        // parallax[1] = new Picture(-270, 0, 540, 540, "parallax2.png");
-
+        background = new Rectangle(0, 0, 300, 800, Color.BLACK);
+        
+        // Initialize small stars (layer 1 - slowest)
+        for (int i = 0; i < smallStars.length; i++) {
+            // Distribute stars evenly across the screen width by dividing into sections
+            int section = 300 / (smallStars.length / 3);
+            int sectionIndex = i % (smallStars.length / 3);
+            int x = (int)(section * sectionIndex + Math.random() * section);
+            int y = (int)(Math.random() * 800);
+            smallStars[i] = new Rectangle(x, y, 0.5, 0.5, Color.WHITE); // Reduced from 1x1 to 0.5x0.5
+        }
+        
+        // Initialize medium stars (layer 2 - medium speed)
+        for (int i = 0; i < mediumStars.length; i++) {
+            // Distribute stars evenly across the screen width
+            int section = 300 / (mediumStars.length / 3);
+            int sectionIndex = i % (mediumStars.length / 3);
+            int x = (int)(section * sectionIndex + Math.random() * section);
+            int y = (int)(Math.random() * 800);
+            mediumStars[i] = new Rectangle(x, y, 1, 1, Color.WHITE); // Reduced from 2x2 to 1x1
+        }
+        
+        // Initialize large stars (layer 3 - fastest)
+        for (int i = 0; i < largeStars.length; i++) {
+            // Distribute stars evenly across the screen width
+            int section = 300 / (largeStars.length / 2);
+            int sectionIndex = i % (largeStars.length / 2);
+            int x = (int)(section * sectionIndex + Math.random() * section);
+            int y = (int)(Math.random() * 800);
+            largeStars[i] = new Rectangle(x, y, 1.5, 1.5, Color.WHITE); // Reduced from 3x3 to 1.5x1.5
+        }
+        
         // Initialize laser object for UFO weapons system
         laser = new Laser(-20, 0, 1);
         // Initialize shield object for UFO
@@ -509,11 +542,39 @@ public class Ufoprogramm {
     }
 
     public void parallax() {
-        // Move parallax layers
-        for (int i = 0; i < parallax.length; i++) {
-            parallax[i].move(0, parallaxSpeeds[i]);
-            if (parallax[i].getShapeY() > 800) {
-                parallax[i].moveTo(parallax[i].getShapeX(), -1080);
+        // Move small stars (layer 1 - slowest)
+        for (int i = 0; i < smallStars.length; i++) {
+            smallStars[i].move(0, smallStarSpeeds[0]);
+            if (smallStars[i].getShapeY() > 800) {
+                // When recycling stars, redistribute them horizontally to maintain even distribution
+                int section = 300 / (smallStars.length / 3);
+                int sectionIndex = i % (smallStars.length / 3);
+                int x = (int)(section * sectionIndex + Math.random() * section);
+                smallStars[i].moveTo(x, 0);
+            }
+        }
+        
+        // Move medium stars (layer 2 - medium speed)
+        for (int i = 0; i < mediumStars.length; i++) {
+            mediumStars[i].move(0, mediumStarSpeeds[0]);
+            if (mediumStars[i].getShapeY() > 800) {
+                // When recycling stars, redistribute them horizontally
+                int section = 300 / (mediumStars.length / 3);
+                int sectionIndex = i % (mediumStars.length / 3);
+                int x = (int)(section * sectionIndex + Math.random() * section);
+                mediumStars[i].moveTo(x, 0);
+            }
+        }
+        
+        // Move large stars (layer 3 - fastest)
+        for (int i = 0; i < largeStars.length; i++) {
+            largeStars[i].move(0, largeStarSpeeds[0]);
+            if (largeStars[i].getShapeY() > 800) {
+                // When recycling stars, redistribute them horizontally
+                int section = 300 / (largeStars.length / 2);
+                int sectionIndex = i % (largeStars.length / 2);
+                int x = (int)(section * sectionIndex + Math.random() * section);
+                largeStars[i].moveTo(x, 0);
             }
         }
     }

@@ -2,7 +2,7 @@ import sas.*;
 
 // FastlAstroid is a child class of Astroid
 public class FastAstroid extends Astroid {
-    double speed = 2;
+    double speed = 3;
     int scoreValue = 30;
 
     // Constructor that calls the parent constructor using super()
