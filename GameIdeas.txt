@@ -50,3 +50,5 @@ UFO GAME ENHANCEMENT IDEAS
 12. Lives System:
     - Give the player multiple lives instead of ending the game on first collision
     - Show remaining lives on screen
+
+13. Dashes

@@ -15,8 +15,8 @@ public class Ufoprogramm {
     Rectangle[] mediumStars = new Rectangle[15]; // New medium-sized star layer
     Rectangle[] largeStars = new Rectangle[8]; // Slightly reduced from 10 to 8
     double[] smallStarSpeeds = { 1 };
-    double[] mediumStarSpeeds = { 1.5};
-    double[] largeStarSpeeds = { 2}; // Increased from 2 to 3
+    double[] mediumStarSpeeds = { 1.5 };
+    double[] largeStarSpeeds = { 2 }; // Increased from 2 to 3
     Astroid astroids[] = new Astroid[3];
     FastAstroid fastAstroid;
     Ufo ufo;
@@ -31,37 +31,37 @@ public class Ufoprogramm {
     Ufoprogramm() {
         window = new View(300, 800, "Ufo");
         background = new Rectangle(0, 0, 300, 800, Color.BLACK);
-        
+
         // Initialize small stars (layer 1 - slowest)
         for (int i = 0; i < smallStars.length; i++) {
             // Distribute stars evenly across the screen width by dividing into sections
             int section = 300 / (smallStars.length / 3);
             int sectionIndex = i % (smallStars.length / 3);
-            int x = (int)(section * sectionIndex + Math.random() * section);
-            int y = (int)(Math.random() * 800);
+            int x = (int) (section * sectionIndex + Math.random() * section);
+            int y = (int) (Math.random() * 800);
             smallStars[i] = new Rectangle(x, y, 0.5, 0.5, Color.WHITE); // Reduced from 1x1 to 0.5x0.5
         }
-        
+
         // Initialize medium stars (layer 2 - medium speed)
         for (int i = 0; i < mediumStars.length; i++) {
             // Distribute stars evenly across the screen width
             int section = 300 / (mediumStars.length / 3);
             int sectionIndex = i % (mediumStars.length / 3);
-            int x = (int)(section * sectionIndex + Math.random() * section);
-            int y = (int)(Math.random() * 800);
+            int x = (int) (section * sectionIndex + Math.random() * section);
+            int y = (int) (Math.random() * 800);
             mediumStars[i] = new Rectangle(x, y, 1, 1, Color.WHITE); // Reduced from 2x2 to 1x1
         }
-        
+
         // Initialize large stars (layer 3 - fastest)
         for (int i = 0; i < largeStars.length; i++) {
             // Distribute stars evenly across the screen width
             int section = 300 / (largeStars.length / 2);
             int sectionIndex = i % (largeStars.length / 2);
-            int x = (int)(section * sectionIndex + Math.random() * section);
-            int y = (int)(Math.random() * 800);
+            int x = (int) (section * sectionIndex + Math.random() * section);
+            int y = (int) (Math.random() * 800);
             largeStars[i] = new Rectangle(x, y, 1.5, 1.5, Color.WHITE); // Reduced from 3x3 to 1.5x1.5
         }
-        
+
         // Initialize laser object for UFO weapons system
         laser = new Laser(-20, 0, 1);
         // Initialize shield object for UFO
@@ -73,7 +73,6 @@ public class Ufoprogramm {
         // Initialize game over screen after UFO is created
         gameOverScreen = new GameOver(ufo);
         gameOverScreen.hideGameOver(true);
-        
 
         // Create asteroid objects and position them off-screen initially
         for (int i = 0; i < astroids.length; i++) {
@@ -141,6 +140,10 @@ public class Ufoprogramm {
             for (int j = 0; j < astroids.length; j++) {
                 astroids[j].setAstroid(-250, -250);
             }
+            // Move all Lasers off screen
+            for (int j = 0; j < ufo.getActiveLasers().size(); j++) {
+                ufo.getActiveLasers().get(j).setHidden(true);
+            }
 
             window.wait(100);
             ufo.hideExplosion();
@@ -160,16 +163,21 @@ public class Ufoprogramm {
         ArrayList<Laser> activeLasers = ufo.getActiveLasers();
         for (int l = 0; l < activeLasers.size(); l++) {
             if (ufo.laserIntersects(astroids[asteroidIndex].getAstroid(), activeLasers.get(l))) {
-                // Award points based on asteroid type plus bonus for shooting
                 increaseScore(astroids[asteroidIndex].getScoreValue() + 20);
 
-                // Remove destroyed asteroid and generate a new one
-                astroids[asteroidIndex].setAstroid(-250, -250);
-                astroidRandomizer(asteroidIndex);
-                astroidStartPosition(asteroidIndex);
+                // Play sound immediately
                 playSound("explosion.wav", false, -20f);
+
                 // Remove the laser beam that hit the asteroid
                 activeLasers.get(l).setHidden(true);
+
+                // Run explosion animation, then respawn asteroid. Did not come up with that
+                // solution myself. Credits Chat GPT 4.1
+                astroids[asteroidIndex].explosionAnimation(() -> {
+                    astroids[asteroidIndex].setAstroid(-250, -250);
+                    astroidRandomizer(asteroidIndex);
+                    astroidStartPosition(asteroidIndex);
+                });
                 break;
             }
         }
@@ -547,14 +555,15 @@ public class Ufoprogramm {
         for (int i = 0; i < smallStars.length; i++) {
             smallStars[i].move(0, smallStarSpeeds[0]);
             if (smallStars[i].getShapeY() > 800) {
-                // When recycling stars, redistribute them horizontally to maintain even distribution
+                // When recycling stars, redistribute them horizontally to maintain even
+                // distribution
                 int section = 300 / (smallStars.length / 3);
                 int sectionIndex = i % (smallStars.length / 3);
-                int x = (int)(section * sectionIndex + Math.random() * section);
+                int x = (int) (section * sectionIndex + Math.random() * section);
                 smallStars[i].moveTo(x, 0);
             }
         }
-        
+
         // Move medium stars (layer 2 - medium speed)
         for (int i = 0; i < mediumStars.length; i++) {
             mediumStars[i].move(0, mediumStarSpeeds[0]);
@@ -562,11 +571,11 @@ public class Ufoprogramm {
                 // When recycling stars, redistribute them horizontally
                 int section = 300 / (mediumStars.length / 3);
                 int sectionIndex = i % (mediumStars.length / 3);
-                int x = (int)(section * sectionIndex + Math.random() * section);
+                int x = (int) (section * sectionIndex + Math.random() * section);
                 mediumStars[i].moveTo(x, 0);
             }
         }
-        
+
         // Move large stars (layer 3 - fastest)
         for (int i = 0; i < largeStars.length; i++) {
             largeStars[i].move(0, largeStarSpeeds[0]);
@@ -574,13 +583,11 @@ public class Ufoprogramm {
                 // When recycling stars, redistribute them horizontally
                 int section = 300 / (largeStars.length / 2);
                 int sectionIndex = i % (largeStars.length / 2);
-                int x = (int)(section * sectionIndex + Math.random() * section);
+                int x = (int) (section * sectionIndex + Math.random() * section);
                 largeStars[i].moveTo(x, 0);
             }
-        }     
+        }
     }
-    
-
 
     public static void main(String[] args) {
         new Ufoprogramm();

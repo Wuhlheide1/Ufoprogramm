@@ -1,5 +1,6 @@
 
 import sas.*;
+import java.awt.Color;
 
 public class Astroid {
     protected Picture astroid;
@@ -10,9 +11,10 @@ public class Astroid {
     private boolean isPowerUp = false;
     private boolean isActive = false;
     private Shield shield;
+    private String averageColour = "gray";
 
     public Astroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
-        astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "Astroid.png");
+        astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "GrayAstroidAlt2.png");
         scale = pScale;
         ufo = pUfo.getUfo();
         astroid.setHidden(false);
@@ -71,4 +73,32 @@ public class Astroid {
     public int getPowerUpTime() {
         return this.powerUpTime;
     }
+
+    public void explosionAnimation(Runnable afterAnimation) {
+        new Thread(() -> {
+            Picture frame;
+            double x = astroid.getShapeX();
+            double y = astroid.getShapeY();
+            astroid.setHidden(true);
+            for (int i = 1; i <= 12; i++) {
+                frame = new Picture(x, y, 50 * scale, 50 * scale, getAverageColour() + "explosion" + i + ".png");
+                frame.setHidden(false);
+                frame.moveTo(x, y);
+                try {
+                    Thread.sleep(3);
+                    frame.setHidden(true);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Call the callback after animation is done
+            if (afterAnimation != null)
+                afterAnimation.run();
+        }).start();
+    }
+
+    public String getAverageColour() {
+        return averageColour;
+    }
+
 }

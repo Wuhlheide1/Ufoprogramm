@@ -4,13 +4,14 @@ import sas.*;
 public class FastAstroid extends Astroid {
     double speed = 3;
     int scoreValue = 30;
+    private String averageColour = "blue";
 
     // Constructor that calls the parent constructor using super()
     public FastAstroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
         super(pX, pY, pScale, pUfo, shield); // Call parent constructor
 
         // Create a new Picture with the same position and size but different image
-        this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "BlueAstroid.png");
+        this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "BlueAstroidAlt2.png");
     }
 
     // Override the getSpeed method from the parent class
@@ -22,5 +23,10 @@ public class FastAstroid extends Astroid {
     @Override
     public int getScoreValue() {
         return scoreValue;
+    }
+
+    @Override
+    public String getAverageColour() {
+        return averageColour;
     }
 }

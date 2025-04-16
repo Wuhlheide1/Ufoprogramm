@@ -6,13 +6,14 @@ public class ZigZagAstroid extends Astroid {
     double xSpeed = 0.75;
     double scale;
     int scoreValue = 60;
+    private String averageColour = "green";
 
     // Constructor that calls the parent constructor using super()
     public ZigZagAstroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
         super(pX, pY, pScale, pUfo, shield); // Call parent constructor
         scale = pScale;
         // Create a new Picture with the same position and size but different image
-        this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "GreenAstroid.png");
+        this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "GreenAstroidAlt2.png");
     }
 
     // Override the getSpeed method from the parent class
@@ -40,5 +41,10 @@ public class ZigZagAstroid extends Astroid {
     @Override
     public int getScoreValue() {
         return scoreValue;
+    }
+
+    @Override
+    public String getAverageColour() {
+        return averageColour;
     }
 }
