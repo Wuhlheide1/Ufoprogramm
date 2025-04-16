@@ -3,5 +3,17 @@
         "lib/**/*.jar",
         "/Users/maxreif/Documents/Apps/sas.5.7.jar",
         "c:\\Users\\sonic\\Downloads\\sas.5.7.jar"
-    ]
+    ],
+    "java.format.settings.url": "eclipse-formatter.xml",
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "ghost-text",
+                "settings": {
+                    "fontStyle": "italic",
+                    "fontFamily": "Monaspace Radon Var"
+                }
+            }
+        ]
+    }
 }

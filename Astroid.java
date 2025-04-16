@@ -100,5 +100,4 @@ public class Astroid {
     public String getAverageColour() {
         return averageColour;
     }
-
 }

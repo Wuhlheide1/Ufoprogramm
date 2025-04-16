@@ -9,12 +9,11 @@ public class GameOver {
     private int scoreValue = 0, highScoreValue = 0;
     private Text highScore;
     Ufo ufo;
-    private int yyyy = 0;
 
     GameOver(Ufo pUfo) {
         gameOver = new Picture(0 - 300, 0, 300, 800, "GameOver.png");
-        playAgain = new Picture(50 - 300, 475, 200, 100 - yyyy, "PlayAgain.png");
-        quit = new Picture(50 - 300, 600, 200, 100 - yyyy, "quit.png");
+        playAgain = new Picture(25 - 300, 500, 250, 62.5, "retry.png");
+        quit = new Picture(25 - 300, 600, 250, 62.5, "quit.png");
         score = new Text(30 - 300, 100, "Score: " + scoreValue, Color.WHITE);
         highScore = new Text(30 - 300, 130, "High Score: " + highScoreValue, Color.WHITE);
         ufo = pUfo;
