@@ -69,7 +69,7 @@ public class Ufo {
         double ufoCenterX = ufo.getShapeX() + (ufo.getShapeWidth() / 2);
 
         // Create a new laser
-        Laser newLaser = new Laser((ufoCenterX - (2 * scale) / 2) + offsetX, ufo.getShapeY(), scale);
+        Laser newLaser = new Laser((ufoCenterX - (2 * scale) / 2) + offsetX, ufo.getShapeY()-15, scale);
         newLaser.getLaser().setHidden(false);
 
         // Use base limit for single shoot, triple for multi-shoot
