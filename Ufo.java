@@ -16,12 +16,16 @@ public class Ufo {
     private final int singleLaserAmount = 10;
     private int MAX_LASERS = singleLaserAmount; // Maximum number of lasers allowed at once
     private boolean isMultiShoot = false;
+    private Picture fire;
+
+    private Picture[] fireFrames;
 
     Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
-        ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rakete.png");
+        ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rock2.png");
         scale = pScale;
         explosion = new Picture(ufo.getShapeX(), ufo.getShapeY(), 85 * 0.75 * scale, 64 * 0.75 * scale,
                 "explosion.png");
+                
         explosion.setHidden(true);
         ufo.setHidden(false);
         currentLaser = pLaser;
@@ -109,7 +113,7 @@ public class Ufo {
     }
 
     public double getWidth() {
-        return scale * 45 * 0.75;
+        return scale * 48 * 0.75;
     }
 
     public void explode() {
@@ -235,4 +239,40 @@ public class Ufo {
             }
         }).start();
     }
+
+
+
+    /*public void fire(boolean animate) {
+        for (Picture frame : fireFrames) {
+            double ufoCenterX = ufo.getShapeX() + ufo.getShapeWidth() / 2;
+            double fireX = ufoCenterX - frame.getShapeWidth() / 2;
+            double fireY = ufo.getShapeY() + ufo.getShapeHeight();
+            frame.moveTo(fireX, fireY);
+            frame.setHidden(true);
+        }
+        if (animate) {
+            new Thread(() -> {
+                try {
+                    int frameDuration = 100; // ms per frame
+                    int totalDuration = 1000; // total animation time
+                    int cycles = totalDuration / (frameDuration * fireFrames.length);
+                    for (int c = 0; c < cycles; c++) {
+                        for (int i = 0; i < fireFrames.length; i++) {
+                            fireFrames[i].setHidden(false);
+                            Thread.sleep(frameDuration);
+                            fireFrames[i].setHidden(true);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+    }
+
+    public void hideFire() {
+        for (Picture frame : fireFrames) {
+            frame.setHidden(true);
+        }
+    }*/
 }

@@ -132,7 +132,9 @@ public class Ufoprogramm {
             }
 
         } else if (!ufo.exploded) {
+            //ufo.hideFire();
             ufo.explode();
+            
             playSound("explosion.wav", false, -20f);
             backgroundMusic.stop();
 
@@ -290,7 +292,7 @@ public class Ufoprogramm {
             while (gameRunning) {
                 // Update parallax background effect
                 parallax();
-
+                //ufo.fire(true);
                 astroidFall();
                 checkInput();
                 checkCollision();
