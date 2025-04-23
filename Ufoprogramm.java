@@ -16,7 +16,7 @@ public class Ufoprogramm {
     Rectangle[] largeStars = new Rectangle[8]; // Slightly reduced from 10 to 8
     double[] smallStarSpeeds = { 1 };
     double[] mediumStarSpeeds = { 1.5 };
-    double[] largeStarSpeeds = { 2 }; // Increased from 2 to 3
+    double[] largeStarSpeeds = { 2 };
     Astroid astroids[] = new Astroid[3];
     FastAstroid fastAstroid;
     Ufo ufo;
@@ -95,11 +95,18 @@ public class Ufoprogramm {
         for (int i = 0; i < astroids.length; i++) {
             // Detect if UFO has collided with any asteroid
             if (astroids[i].isColliding(shield)) {
-                powerUpEffect(i);
-                // Hide the shield
-                shield.hideShield(true);
-                // Reset the shield position
-                shield.setPosition(-250, -250);
+                // if it is a power up
+                if (astroids[i].isPowerUp()) {
+                    handleUfoCollision(i);
+
+                } else {
+                    powerUpEffect(i);
+                    // Hide the shield
+                    shield.hideShield(true);
+                    // Reset the shield position
+                    shield.setPosition(-250, -250);
+                }
+
                 return;
             }
             if (astroids[i].isColliding(ufo)) {
@@ -114,27 +121,25 @@ public class Ufoprogramm {
     // Processes what happens when the UFO collides with an asteroid
     private void handleUfoCollision(int asteroidIndex) {
         if (astroids[asteroidIndex].isPowerUp()) {
-            // Add powerup activation behaviour here
-            if (astroids[asteroidIndex] instanceof PowerUpAstroid) {
-                ufo.disableMultiShoot();
+            if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
+                ufo.enableMultiShoot();
                 ufo.gunPowerUp(astroids[asteroidIndex]);
                 powerUpEffect(asteroidIndex);
-
-            } else if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
-                if (astroids[asteroidIndex] instanceof PowerUpAstroidSuper) {
-                    ufo.enableMultiShoot();
-                    ufo.gunPowerUp(astroids[asteroidIndex]);
-                    powerUpEffect(asteroidIndex);
+            } else if (astroids[asteroidIndex] instanceof PowerUpAstroid) {
+                // Only disable multi-shoot if not currently in multi-shoot mode
+                if (!ufo.isMultiShoot()) {
+                    ufo.disableMultiShoot();
                 }
+                ufo.gunPowerUp(astroids[asteroidIndex]);
+                powerUpEffect(asteroidIndex);
             } else if (astroids[asteroidIndex] instanceof ShieldPowerUp) {
                 ufo.enableShield(astroids[asteroidIndex], shield);
                 powerUpEffect(asteroidIndex);
             }
-
         } else if (!ufo.exploded) {
-            //ufo.hideFire();
+            // ufo.hideFire();
             ufo.explode();
-            
+
             playSound("explosion.wav", false, -20f);
             backgroundMusic.stop();
 
@@ -165,6 +170,12 @@ public class Ufoprogramm {
         ArrayList<Laser> activeLasers = ufo.getActiveLasers();
         for (int l = 0; l < activeLasers.size(); l++) {
             if (ufo.laserIntersects(astroids[asteroidIndex].getAstroid(), activeLasers.get(l))) {
+                if (astroids[asteroidIndex] instanceof PowerUpAstroid
+                        || astroids[asteroidIndex] instanceof PowerUpAstroidSuper
+                        || astroids[asteroidIndex] instanceof ShieldPowerUp) {
+                    // stop early
+                    break;
+                }
                 increaseScore(astroids[asteroidIndex].getScoreValue() + 20);
 
                 // Play sound immediately
@@ -292,7 +303,7 @@ public class Ufoprogramm {
             while (gameRunning) {
                 // Update parallax background effect
                 parallax();
-                //ufo.fire(true);
+                // ufo.fire(true);
                 astroidFall();
                 checkInput();
                 checkCollision();

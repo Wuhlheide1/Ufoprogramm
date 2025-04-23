@@ -8,24 +8,21 @@ public class Ufo {
     private Picture explosion;
     private boolean isGunPoweredUp = false, isShieldActive = false;
     private long lastShotTime = 0;
-    private final long SHOT_INTERVAL = 200; // milliseconds between shots
+    private final long SHOT_INTERVAL = 300; // milliseconds between shots
     private Laser currentLaser;
     Ufoprogramm ufoprogramm;
     // Add these fields to track multiple lasers
     private ArrayList<Laser> activeLasers = new ArrayList<>();
     private final int singleLaserAmount = 10;
-    private int MAX_LASERS = singleLaserAmount; // Maximum number of lasers allowed at once
     private boolean isMultiShoot = false;
-    private Picture fire;
-
-    private Picture[] fireFrames;
+    private long gunPowerUpEndTime = 0;
 
     Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
         ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rock2.png");
         scale = pScale;
         explosion = new Picture(ufo.getShapeX(), ufo.getShapeY(), 85 * 0.75 * scale, 64 * 0.75 * scale,
                 "explosion.png");
-                
+
         explosion.setHidden(true);
         ufo.setHidden(false);
         currentLaser = pLaser;
@@ -69,7 +66,7 @@ public class Ufo {
         double ufoCenterX = ufo.getShapeX() + (ufo.getShapeWidth() / 2);
 
         // Create a new laser
-        Laser newLaser = new Laser((ufoCenterX - (2 * scale) / 2) + offsetX, ufo.getShapeY()-15, scale);
+        Laser newLaser = new Laser((ufoCenterX - (2 * scale) / 2) + offsetX, ufo.getShapeY() - 15, scale);
         newLaser.getLaser().setHidden(false);
 
         // Use base limit for single shoot, triple for multi-shoot
@@ -136,20 +133,18 @@ public class Ufo {
     }
 
     public void gunPowerUp(Astroid asteroid) {
+        gunPowerUpEndTime = isGunPoweredUp ? gunPowerUpEndTime + asteroid.getPowerUpTime()
+                : System.currentTimeMillis() + asteroid.getPowerUpTime();
         isGunPoweredUp = true;
+        System.out.println(
+                "Laser powerup extended! Ends at: " + gunPowerUpEndTime + ", now: " + System.currentTimeMillis());
         lastShotTime = 0;
-        // Clear any existing lasers when power-up starts
-        for (Laser laser : activeLasers) {
-            laser.setHidden(true);
-        }
-        activeLasers.clear();
-
-        // Use default time if asteroid is null or time is invalid
-        int time = (asteroid != null) ? asteroid.getPowerUpTime() : 10000;
 
         new Thread(() -> {
             try {
-                Thread.sleep(time);
+                while (System.currentTimeMillis() < gunPowerUpEndTime) {
+                    Thread.sleep(10);
+                }
                 isGunPoweredUp = false;
                 // Hide all lasers when power-up ends
                 for (Laser laser : activeLasers) {
@@ -200,8 +195,7 @@ public class Ufo {
         shield.hideShield(false); // Show the shield first
 
         // Ensure minimum duration of 10 seconds (10000 milliseconds)
-        int time = (asteroid != null && asteroid.getPowerUpTime() > 0) ? 
-                  asteroid.getPowerUpTime() : 10000;
+        int time = (asteroid != null && asteroid.getPowerUpTime() > 0) ? asteroid.getPowerUpTime() : 10000;
 
         new Thread(() -> {
             long startTime = System.currentTimeMillis();
@@ -209,22 +203,25 @@ public class Ufo {
                 // Continuously update shield position while active
                 int count = 0;
                 int initialBlinkSpeed = 100; // Starting blink interval
-                int minBlinkSpeed = 15;      // Fastest blink interval we want to reach
+                int minBlinkSpeed = 15; // Fastest blink interval we want to reach
                 while (System.currentTimeMillis() - startTime < time) {
                     shield.centerOnUfo(this);
                     // Check if shield is about to expire (last 3 seconds)
                     long remainingTime = time - (System.currentTimeMillis() - startTime);
-                    if(remainingTime < 3000){
+                    if (remainingTime < 3000) {
                         count++;
                         // Calculate current blink speed using a non-linear equation
-                        // This creates a smooth acceleration curve that starts slow and gradually speeds up
+                        // This creates a smooth acceleration curve that starts slow and gradually
+                        // speeds up
                         // 3000ms = full warning period, remainingTime = time left in ms
                         double progress = 1.0 - (remainingTime / 3000.0); // 0.0 to 1.0 (start to end)
                         // Apply a quadratic curve for natural acceleration feel
                         double speedFactor = Math.pow(progress, 1.5); // Adjust exponent for curve shape
-                        // Calculate current blink speed - starts at initialBlinkSpeed, approaches minBlinkSpeed
-                        int currentBlinkSpeed = (int)(initialBlinkSpeed - (speedFactor * (initialBlinkSpeed - minBlinkSpeed)));
-                        
+                        // Calculate current blink speed - starts at initialBlinkSpeed, approaches
+                        // minBlinkSpeed
+                        int currentBlinkSpeed = (int) (initialBlinkSpeed
+                                - (speedFactor * (initialBlinkSpeed - minBlinkSpeed)));
+
                         if (count >= currentBlinkSpeed) {
                             count = 0;
                             shield.blink();
@@ -240,39 +237,4 @@ public class Ufo {
         }).start();
     }
 
-
-
-    /*public void fire(boolean animate) {
-        for (Picture frame : fireFrames) {
-            double ufoCenterX = ufo.getShapeX() + ufo.getShapeWidth() / 2;
-            double fireX = ufoCenterX - frame.getShapeWidth() / 2;
-            double fireY = ufo.getShapeY() + ufo.getShapeHeight();
-            frame.moveTo(fireX, fireY);
-            frame.setHidden(true);
-        }
-        if (animate) {
-            new Thread(() -> {
-                try {
-                    int frameDuration = 100; // ms per frame
-                    int totalDuration = 1000; // total animation time
-                    int cycles = totalDuration / (frameDuration * fireFrames.length);
-                    for (int c = 0; c < cycles; c++) {
-                        for (int i = 0; i < fireFrames.length; i++) {
-                            fireFrames[i].setHidden(false);
-                            Thread.sleep(frameDuration);
-                            fireFrames[i].setHidden(true);
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }
-    }
-
-    public void hideFire() {
-        for (Picture frame : fireFrames) {
-            frame.setHidden(true);
-        }
-    }*/
 }
