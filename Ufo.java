@@ -16,6 +16,8 @@ public class Ufo {
     private final int singleLaserAmount = 10;
     private boolean isMultiShoot = false;
     private long gunPowerUpEndTime = 0;
+    private long shieldPowerUpEndTime = 0;
+    // ... (other methods)
 
     Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
         ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rock2.png");
@@ -191,40 +193,23 @@ public class Ufo {
     }
 
     public void enableShield(Astroid asteroid, Shield shield) {
+        shield.resetTexture();
+        shieldPowerUpEndTime = isShieldActive ? shieldPowerUpEndTime + asteroid.getPowerUpTime()
+                : System.currentTimeMillis() + asteroid.getPowerUpTime();
         isShieldActive = true;
         shield.hideShield(false); // Show the shield first
 
-        // Ensure minimum duration of 10 seconds (10000 milliseconds)
-        int time = (asteroid != null && asteroid.getPowerUpTime() > 0) ? asteroid.getPowerUpTime() : 10000;
-
         new Thread(() -> {
-            long startTime = System.currentTimeMillis();
+            int count = 0;
             try {
-                // Continuously update shield position while active
-                int count = 0;
-                int initialBlinkSpeed = 100; // Starting blink interval
-                int minBlinkSpeed = 15; // Fastest blink interval we want to reach
-                while (System.currentTimeMillis() - startTime < time) {
-                    shield.centerOnUfo(this);
-                    // Check if shield is about to expire (last 3 seconds)
-                    long remainingTime = time - (System.currentTimeMillis() - startTime);
-                    if (remainingTime < 3000) {
+                while (System.currentTimeMillis() < shieldPowerUpEndTime) {
+                    shield.centerOnUfo(this); // Center the shield on the UFO
+                    if (shieldPowerUpEndTime - System.currentTimeMillis() < 1500) {
+                        // Flash the shield for the last 300ms
                         count++;
-                        // Calculate current blink speed using a non-linear equation
-                        // This creates a smooth acceleration curve that starts slow and gradually
-                        // speeds up
-                        // 3000ms = full warning period, remainingTime = time left in ms
-                        double progress = 1.0 - (remainingTime / 3000.0); // 0.0 to 1.0 (start to end)
-                        // Apply a quadratic curve for natural acceleration feel
-                        double speedFactor = Math.pow(progress, 1.5); // Adjust exponent for curve shape
-                        // Calculate current blink speed - starts at initialBlinkSpeed, approaches
-                        // minBlinkSpeed
-                        int currentBlinkSpeed = (int) (initialBlinkSpeed
-                                - (speedFactor * (initialBlinkSpeed - minBlinkSpeed)));
-
-                        if (count >= currentBlinkSpeed) {
+                        if (count == 500) {
+                            shield.blinkShield();
                             count = 0;
-                            shield.blink();
                         }
                     }
                     Thread.sleep(10); // Update position every 10ms

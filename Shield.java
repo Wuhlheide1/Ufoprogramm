@@ -35,14 +35,16 @@ public class Shield {
         return shield;
     }
 
-    public void blink() {
+    public void resetTexture() {
+        shield.loadTexture("Shield2.png");
+    }
+
+    public void blinkShield() {
         if (!blinked) {
-            shield.setHidden(true);
-            shield = new Picture(shield.getShapeX(), shield.getShapeY(), 55 * 1, 55 * 1, "Shield2.png");
+            shield.loadTexture("Shield.png");
             blinked = true;
         } else {
-            shield.setHidden(true);
-            shield = new Picture(shield.getShapeX(), shield.getShapeY(), 55 * 1, 55 * 1, "Shield.png");
+            resetTexture();
             blinked = false;
         }
     }
