@@ -11,9 +11,9 @@ public class GameOver {
     Ufo ufo;
 
     GameOver(Ufo pUfo) {
-        gameOver = new Picture(0 - 300, 0, 300, 800, "GameOver.png");
-        playAgain = new Picture(25 - 300, 500, 250, 62.5, "retry.png");
-        quit = new Picture(25 - 300, 600, 250, 62.5, "quit.png");
+        gameOver = new Picture(0 - 300, 0, 300, 800, "textures/GameOver.png");
+        playAgain = new Picture(25 - 300, 500, 250, 62.5, "textures/retry.png");
+        quit = new Picture(25 - 300, 600, 250, 62.5, "textures/quit.png");
         score = new Text(30 - 300, 100, "Score: " + scoreValue, Color.WHITE);
         highScore = new Text(30 - 300, 130, "High Score: " + highScoreValue, Color.WHITE);
         ufo = pUfo;

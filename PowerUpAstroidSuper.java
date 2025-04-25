@@ -13,7 +13,7 @@ public class PowerUpAstroidSuper extends Astroid {
         super(pX, pY, pScale, pUfo, shield); // Call parent constructor
 
         // Create a new Picture with the same position and size but different image
-        this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "RedAstroidSuperAlt2.png");
+        this.astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "textures/RedAstroidSuperAlt2.png");
     }
 
     // Override the getSpeed method from the parent class

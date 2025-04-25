@@ -6,7 +6,7 @@ public class Shield {
     private boolean blinked = false;
 
     Shield(double pX, double pY, double pScale) {
-        shield = new Picture(pX, pY, 55 * pScale, 55 * pScale, "Shield2.png");
+        shield = new Picture(pX, pY, 55 * pScale, 55 * pScale, "textures/Shield2.png");
         shieldWidth = shieldWidth * pScale;
     }
 
@@ -36,12 +36,12 @@ public class Shield {
     }
 
     public void resetTexture() {
-        shield.loadTexture("Shield2.png");
+        shield.loadTexture("textures/Shield2.png");
     }
 
     public void blinkShield() {
         if (!blinked) {
-            shield.loadTexture("Shield.png");
+            shield.loadTexture("textures/Shield.png");
             blinked = true;
         } else {
             resetTexture();

@@ -14,7 +14,7 @@ public class Astroid {
     private String averageColour = "gray";
 
     public Astroid(double pX, double pY, double pScale, Ufo pUfo, Shield shield) {
-        astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "GrayAstroidAlt2.png");
+        astroid = new Picture(pX, pY, 30 * pScale, 30 * pScale, "textures/GrayAstroidAlt2.png");
         scale = pScale;
         ufo = pUfo.getUfo();
         astroid.setHidden(false);
@@ -81,7 +81,7 @@ public class Astroid {
             double y = astroid.getShapeY();
             astroid.setHidden(true);
             for (int i = 1; i <= 12; i++) {
-                frame = new Picture(x, y, 50 * scale, 50 * scale, getAverageColour() + "explosion" + i + ".png");
+                frame = new Picture(x, y, 50 * scale, 50 * scale, "textures/" + getAverageColour() + "explosion" + i + ".png");
                 frame.setHidden(false);
                 frame.moveTo(x, y);
                 try {

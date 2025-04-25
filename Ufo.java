@@ -17,13 +17,11 @@ public class Ufo {
     private boolean isMultiShoot = false;
     private long gunPowerUpEndTime = 0;
     private long shieldPowerUpEndTime = 0;
-    // ... (other methods)
-
     Ufo(double pX, double pY, double pScale, Laser pLaser, Ufoprogramm pUfoprogramm) {
-        ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "rock2.png");
+        ufo = new Picture(pX, pY, 45 * 0.75 * pScale, 64 * 0.75 * pScale, "textures/rock2.png");
         scale = pScale;
         explosion = new Picture(ufo.getShapeX(), ufo.getShapeY(), 85 * 0.75 * scale, 64 * 0.75 * scale,
-                "explosion.png");
+                "textures/explosion.png");
 
         explosion.setHidden(true);
         ufo.setHidden(false);
